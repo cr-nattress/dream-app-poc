@@ -10,6 +10,7 @@ import {
 } from '@/types';
 import { VideoGenerationError } from './errors';
 import { logger } from './logger';
+import { renderDreamPrompt } from './prompt-template';
 
 const OPENAI_API_BASE = 'https://api.openai.com/v1';
 
@@ -23,8 +24,8 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
     throw new VideoGenerationError('OPENAI_API_KEY is not configured');
   }
 
-  // Enhance prompt with cinematic elements
-  const enhancedPrompt = `Cinematic dream sequence: ${prompt}`;
+  // Render dream-focused prompt template with user notes
+  const enhancedPrompt = renderDreamPrompt(prompt);
 
   const requestBody = {
     model: 'sora-2',
