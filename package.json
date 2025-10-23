@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:netlify": "netlify dev",
-    "build:functions": "tsup netlify/functions --dts=false --format=cjs --outDir .netlify/functions-built --splitting=false",
-    "watch:functions": "cross-env CHOKIDAR_USEPOLLING=1 WATCHPACK_POLLING=true tsup netlify/functions --watch --dts=false --format=cjs --outDir .netlify/functions-built --splitting=false",
+    "build:functions": "tsup netlify/functions --format=cjs --outDir .netlify/functions-built --splitting=false",
+    "watch:functions": "cross-env CHOKIDAR_USEPOLLING=1 WATCHPACK_POLLING=true tsup netlify/functions --watch --format=cjs --outDir .netlify/functions-built --splitting=false",
     "dev:functions": "npm-run-all -p watch:functions serve:functions",
     "serve:functions": "netlify functions:serve --port 9999",
     "dev:web": "next dev",
