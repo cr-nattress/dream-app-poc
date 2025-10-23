@@ -18,7 +18,10 @@ docs/backlog/
     ├── EPIC-003-display-dream-videos-list/
     │   ├── epic.md
     │   └── user-stories/
-    └── EPIC-004-update-polling-frequency/
+    ├── EPIC-004-update-polling-frequency/
+    │   ├── epic.md
+    │   └── user-stories/
+    └── EPIC-005-dream-prompt-template/
         ├── epic.md
         └── user-stories/
 ```
@@ -31,8 +34,11 @@ docs/backlog/
 | [EPIC-002](epics/EPIC-002-standardize-video-dimensions/epic.md) | Standardize Video Dimensions | ⚠️ Medium | 5 pts | ✅ Done |
 | [EPIC-003](epics/EPIC-003-display-dream-videos-list/epic.md) | Display Dream Videos List | 🔴 High | 8 pts | ✅ Done |
 | [EPIC-004](epics/EPIC-004-update-polling-frequency/epic.md) | Update Polling Frequency | 💡 Low | 2 pts | ✅ Done |
+| [EPIC-005](epics/EPIC-005-dream-prompt-template/epic.md) | Dream Prompt Template System | 🔴 High | 13 pts | 📋 To Do |
 
-**Total Story Points:** 23 ✅ **ALL COMPLETE**
+**Completed Story Points:** 23 ✅
+**New Story Points:** 13
+**Total Story Points:** 36
 
 ## 🚀 Getting Started
 
@@ -77,6 +83,16 @@ docs/backlog/
 **Key Changes:**
 - Update POLLING_INTERVAL constant
 - Reduce API load by 50%
+
+### EPIC-005: Dream Prompt Template System
+**Goal:** Transform user dream notes into cinematic dream videos using a specialized prompt template.
+
+**Key Changes:**
+- Create prompt template utility module
+- Define comprehensive dream-focused template
+- Replace simple enhancement with rich template system
+- Add tone, mood, style, camera, and sound guidance
+- Design for future dynamic configuration
 
 ## 🎨 Design Principles
 
