@@ -28,10 +28,10 @@ export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
           <p className="text-gray-800 italic">&quot;{prompt}&quot;</p>
         </div>
 
-        <div className="bg-black rounded-lg overflow-hidden">
+        <div className="bg-black rounded-lg overflow-hidden max-w-full mx-auto" style={{ maxHeight: 'calc(100vh - 300px)', aspectRatio: '16 / 9' }}>
           <video
             controls
-            className="w-full"
+            className="w-full h-full object-contain"
             preload="metadata"
           >
             <source src={videoUrl} type="video/mp4" />
