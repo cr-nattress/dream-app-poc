@@ -140,7 +140,17 @@ export async function downloadVideo(jobId: string): Promise<Buffer> {
     });
 
     if (!response.ok) {
-      throw new VideoGenerationError('Failed to download video', 'DOWNLOAD_ERROR');
+      const errorText = await response.text();
+      logger.error('Download request failed', {
+        jobId,
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+      });
+      throw new VideoGenerationError(
+        `Failed to download video: ${response.status} ${response.statusText}`,
+        'DOWNLOAD_ERROR'
+      );
     }
 
     const arrayBuffer = await response.arrayBuffer();

@@ -8,6 +8,7 @@ import { createVideoJob } from '../../src/lib/sora-api';
 import { validatePrompt, validateEnvVars } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
 import { logger } from '../../src/lib/logger';
+import { fileLogger, logToAppFile } from '../../src/lib/file-logger';
 
 export const handler: Handler = async (event: HandlerEvent) => {
   // Only allow POST requests

@@ -78,7 +78,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
           }),
         };
       } catch (downloadError) {
-        logger.error('Failed to download/store video', { jobId, error: downloadError });
+        const errorMessage =
+          downloadError instanceof Error ? downloadError.message : 'Unknown error';
+        logger.error('Failed to download/store video', {
+          jobId,
+          error: errorMessage,
+          errorStack: downloadError instanceof Error ? downloadError.stack : undefined,
+        });
         // Return error but keep status as completed so frontend knows generation succeeded
         return {
           statusCode: 500,
@@ -86,7 +92,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            error: 'Video generation completed but download failed',
+            error: `Video generation completed but download failed: ${errorMessage}`,
             jobId: status.id,
           }),
         };
