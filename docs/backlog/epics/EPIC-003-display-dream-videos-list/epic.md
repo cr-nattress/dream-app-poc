@@ -2,7 +2,7 @@
 
 **Epic ID:** EPIC-003
 **Title:** Display Dream Videos List with Clickable Links
-**Status:** 📋 To Do
+**Status:** ✅ Done
 **Priority:** 🔴 High
 **Estimated Story Points:** 8
 
@@ -55,15 +55,15 @@ Enhance the "Your Dream Videos" section by displaying each completed video as a 
 
 ## Acceptance Criteria
 
-- [ ] Each completed video appears as clickable link in "Your Dream Videos"
-- [ ] Videos ordered by completedAt (newest at top)
-- [ ] Clicking video link displays/navigates to that video
-- [ ] Active/selected video has visual indicator
-- [ ] Prompt text shown in list (truncated if long)
-- [ ] completedAt timestamp displayed in friendly format
-- [ ] List updates when new video completes
-- [ ] Works on mobile and desktop
-- [ ] Smooth transitions when switching videos
+- [x] Each completed video appears as clickable link in "Your Dream Videos" - **Button elements with onClick handlers (VideoHistory.tsx:65-72)**
+- [x] Videos ordered by completedAt (newest at top) - **getCompletedVideos() sorts descending (storage.ts:92-96)**
+- [x] Clicking video link displays/navigates to that video - **onSelect callback triggers video display**
+- [x] Active/selected video has visual indicator - **Blue border and background when currentJobId matches (VideoHistory.tsx:68-70)**
+- [x] Prompt text shown in list (truncated if long) - **CSS truncate class applied (VideoHistory.tsx:76)**
+- [x] completedAt timestamp displayed in friendly format - **formatDate() shows "Month DD, YYYY HH:MM" (VideoHistory.tsx:32-41)**
+- [x] List updates when new video completes - **useEffect with currentJobId dependency (VideoHistory.tsx:21-23)**
+- [x] Works on mobile and desktop - **Responsive design with w-full and flex layouts**
+- [x] Smooth transitions when switching videos - **Tailwind transition-colors (VideoHistory.tsx:67)**
 
 ---
 
