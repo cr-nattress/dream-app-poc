@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getVideoHistory, clearVideoHistory } from '@/lib/storage';
+import { getCompletedVideos, clearVideoHistory } from '@/lib/storage';
 import { VideoHistoryItem } from '@/types';
 import { Button } from '../ui/Button';
 
@@ -14,7 +14,7 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
   const [history, setHistory] = useState<VideoHistoryItem[]>([]);
 
   const loadHistory = () => {
-    const items = getVideoHistory();
+    const items = getCompletedVideos(); // Only show completed videos
     setHistory(items);
   };
 
@@ -62,9 +62,9 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
 
       <div className="space-y-2">
         {history.map((item) => (
-          <div
+          <button
             key={item.jobId}
-            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+            className={`w-full text-left p-4 border rounded-lg cursor-pointer transition-colors ${
               item.jobId === currentJobId
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -73,38 +73,32 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
           >
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-gray-800 truncate">&quot;{item.prompt}&quot;</p>
+                <p className="text-gray-800 font-medium truncate">&quot;{item.prompt}&quot;</p>
                 <div className="flex items-center space-x-4 mt-2">
-                  <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'completed'
-                        ? 'bg-green-100 text-green-800'
-                        : item.status === 'failed'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {item.status}
+                  <span className="text-xs text-gray-500">
+                    {item.completedAt
+                      ? `Completed: ${formatDate(item.completedAt)}`
+                      : formatDate(item.createdAt)}
                   </span>
-                  <span className="text-xs text-gray-500">{formatDate(item.createdAt)}</span>
+                  <span className="text-xs text-blue-600 font-medium">👁️ View Video</span>
                 </div>
               </div>
 
-              {item.status === 'completed' && (
-                <svg
-                  className="h-5 w-5 text-green-500 ml-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
+              <svg
+                className="h-5 w-5 text-blue-500 ml-2 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

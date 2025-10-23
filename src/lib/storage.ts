@@ -14,16 +14,20 @@ export function saveVideoToHistory(item: VideoHistoryItem): void {
   try {
     const data = getStorageData();
 
-    // Check if item already exists
-    const existingIndex = data.videos.findIndex((v) => v.jobId === item.jobId);
+    // Remove any existing entry with same jobId (ensure no duplicates)
+    data.videos = data.videos.filter((v) => v.jobId !== item.jobId);
 
-    if (existingIndex >= 0) {
-      // Update existing item
-      data.videos[existingIndex] = item;
-    } else {
-      // Add new item
-      data.videos.unshift(item); // Add to beginning
-    }
+    // Add the item
+    data.videos.push(item);
+
+    // Sort by completedAt descending (newest first)
+    // Videos without completedAt go to the end
+    data.videos.sort((a, b) => {
+      if (!a.completedAt && !b.completedAt) return 0;
+      if (!a.completedAt) return 1;
+      if (!b.completedAt) return -1;
+      return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+    });
 
     // Keep only last 50 videos
     if (data.videos.length > 50) {
@@ -74,6 +78,25 @@ export function getVideoFromHistory(jobId: string): VideoHistoryItem | null {
   } catch (error) {
     console.error('Failed to get video from history:', error);
     return null;
+  }
+}
+
+/**
+ * Gets only completed videos from history, sorted by completedAt descending
+ */
+export function getCompletedVideos(): VideoHistoryItem[] {
+  try {
+    const data = getStorageData();
+
+    return data.videos
+      .filter((v) => v.status === 'completed' && v.completedAt && v.videoUrl)
+      .sort((a, b) => {
+        if (!a.completedAt || !b.completedAt) return 0;
+        return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+      });
+  } catch (error) {
+    console.error('Failed to get completed videos:', error);
+    return [];
   }
 }
 

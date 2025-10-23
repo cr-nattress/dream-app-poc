@@ -6,7 +6,7 @@ import { VideoJob, VideoStatus as Status } from '@/types';
 import { Spinner } from '../ui/Spinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
 
-const POLL_INTERVAL = 5000; // 5 seconds
+const POLL_INTERVAL = 10000; // 10 seconds
 
 const STATUS_MESSAGES: Record<Status, string> = {
   pending: 'Initializing video generation...',
@@ -112,7 +112,7 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
         </div>
 
         <p className="text-xs text-gray-500 text-center">
-          Status updates every 5 seconds. This usually takes 3-5 minutes...
+          Status updates every 10 seconds. This usually takes 3-5 minutes...
         </p>
       </div>
     </div>
