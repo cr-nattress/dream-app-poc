@@ -26,11 +26,9 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
   // Enhance prompt with cinematic elements
   const enhancedPrompt = `Cinematic dream sequence: ${prompt}`;
 
-  const requestBody: CreateVideoRequest = {
+  const requestBody = {
     model: 'sora-2',
     prompt: enhancedPrompt,
-    duration: 10,
-    resolution: '720p',
   };
 
   logger.info('Creating video job', { promptLength: prompt.length });
