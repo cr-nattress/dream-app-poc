@@ -1,9 +1,0 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- White background for Apple icon -->
-  <rect width="180" height="180" fill="white" rx="40"/>
-  <!-- Crescent moon representing dreams (scaled up) -->
-  <path d="M112.5 22.5C112.5 22.5 78.75 33.75 78.75 90C78.75 146.25 112.5 157.5 112.5 157.5C67.5 157.5 33.75 123.75 33.75 90C33.75 56.25 67.5 22.5 112.5 22.5Z" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
-  <!-- Small star (scaled up) -->
-  <circle cx="135" cy="56.25" r="8.5" fill="#1a1a1a"/>
-  <path d="M135 42.25 L135 70.25 M121 56.25 L149 56.25" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>
-</svg>
