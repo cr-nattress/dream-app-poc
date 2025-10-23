@@ -31,7 +31,6 @@ yarn-error.log*
 
 # Netlify
 .netlify/
-netlify/
 
 # TypeScript
 *.tsbuildinfo
@@ -46,6 +45,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Claude Code
+.claude/
 
 # Temporary files
 tmp/
