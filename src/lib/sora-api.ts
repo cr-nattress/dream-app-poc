@@ -58,7 +58,9 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
     return {
       jobId: data.id,
       status: 'pending',
-      createdAt: new Date(data.created_at * 1000).toISOString(),
+      createdAt: data.created_at
+        ? new Date(data.created_at * 1000).toISOString()
+        : new Date().toISOString(),
     };
   } catch (error) {
     if (error instanceof VideoGenerationError) {

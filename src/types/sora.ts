@@ -33,10 +33,9 @@ export interface CreateVideoResponse {
 export interface VideoStatusResponse {
   id: string;
   status: string;
-  created_at: number;
+  created_at?: number;
   completed_at?: number;
-  download_url?: string;
-  error?: string;
+  error?: string | null;
 }
 
 /**

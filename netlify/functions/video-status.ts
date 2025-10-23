@@ -54,26 +54,43 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const status = await getVideoStatus(jobId);
 
     // If completed, download and store the video
-    if (status.status === 'completed' && status.download_url) {
+    if (status.status === 'completed') {
       logger.info('Video completed, downloading', { jobId });
 
-      const videoData = await downloadVideo(jobId);
-      const videoUrl = await storeVideo(jobId, videoData);
+      try {
+        const videoData = await downloadVideo(jobId);
+        const videoUrl = await storeVideo(jobId, videoData);
 
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId: status.id,
-          status: 'completed',
-          videoUrl,
-          completedAt: status.completed_at
-            ? new Date(status.completed_at * 1000).toISOString()
-            : new Date().toISOString(),
-        }),
-      };
+        logger.info('Video downloaded and stored successfully', { jobId });
+
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jobId: status.id,
+            status: 'completed',
+            videoUrl,
+            completedAt: status.completed_at
+              ? new Date(status.completed_at * 1000).toISOString()
+              : new Date().toISOString(),
+          }),
+        };
+      } catch (downloadError) {
+        logger.error('Failed to download/store video', { jobId, error: downloadError });
+        // Return error but keep status as completed so frontend knows generation succeeded
+        return {
+          statusCode: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            error: 'Video generation completed but download failed',
+            jobId: status.id,
+          }),
+        };
+      }
     }
 
     // Return current status
