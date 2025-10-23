@@ -60,7 +60,7 @@ test.describe('Page Layout', () => {
   test('should display header', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.locator('h1:has-text("Dream Video Generator")')).toBeVisible();
+    await expect(page.locator('h1:has-text("DreamIt")')).toBeVisible();
     await expect(
       page.locator('text=Create AI videos from your dream descriptions')
     ).toBeVisible();

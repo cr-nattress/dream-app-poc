@@ -4,8 +4,8 @@ import { Header } from '@/components/layout/Header';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Dream Video Generator',
-    template: '%s | Dream Video Generator',
+    default: 'DreamIt',
+    template: '%s | DreamIt',
   },
   description: 'Generate AI videos from your dream descriptions using Sora 2',
   icons: {
