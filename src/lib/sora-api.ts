@@ -29,6 +29,7 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
   const requestBody = {
     model: 'sora-2',
     prompt: enhancedPrompt,
+    duration: 15, // Attempt to request 15-second videos
   };
 
   logger.info('Creating video job', { promptLength: prompt.length });
