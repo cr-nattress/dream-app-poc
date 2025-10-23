@@ -31,6 +31,8 @@ yarn-error.log*
 
 # Netlify
 .netlify/
+.netlify/functions-built/
+.netlify/functions-serve/
 
 # TypeScript
 *.tsbuildinfo

@@ -3,16 +3,33 @@
  * GET /api/video-status/:jobId
  */
 
-import type { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getVideoStatus, downloadVideo } from '../../src/lib/sora-api';
 import { storeVideo, videoExists } from '../../src/lib/blob-storage';
 import { validateJobId } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
-import { logger } from '../../src/lib/logger';
+import { BlobLogger } from '../../src/lib/blob-logger';
+import { randomUUID } from 'crypto';
 
-export const handler: Handler = async (event: HandlerEvent) => {
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  const requestId = randomUUID();
+  const blobLogger = new BlobLogger({
+    service: 'video-status',
+    env: (process.env.CONTEXT as any) || 'dev',
+  });
+
+  const start = Date.now();
+
   // Only allow GET requests
   if (event.httpMethod !== 'GET') {
+    blobLogger.warn({
+      msg: 'method_not_allowed',
+      requestId,
+      method: event.httpMethod,
+      route: event.path,
+    });
+    await blobLogger.flush();
+
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' }),
@@ -24,9 +41,25 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const pathParts = event.path.split('/');
     const jobId = pathParts[pathParts.length - 1];
 
+    blobLogger.info({
+      msg: 'request.start',
+      requestId,
+      route: event.path,
+      method: event.httpMethod,
+      jobId,
+    });
+
     // Validate job ID
     const validation = validateJobId(jobId);
     if (!validation.valid) {
+      blobLogger.warn({
+        msg: 'invalid_job_id',
+        requestId,
+        jobId,
+        error: validation.error,
+      });
+      await blobLogger.flush();
+
       throw new ValidationError(validation.error || 'Invalid job ID');
     }
 
@@ -34,7 +67,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const exists = await videoExists(jobId);
 
     if (exists) {
-      logger.debug('Video already in blob storage', { jobId });
+      blobLogger.info({
+        msg: 'video_cached',
+        requestId,
+        jobId,
+        latencyMs: Date.now() - start,
+      });
+      await blobLogger.flush();
 
       return {
         statusCode: 200,
@@ -53,15 +92,46 @@ export const handler: Handler = async (event: HandlerEvent) => {
     // Get status from Sora API
     const status = await getVideoStatus(jobId);
 
+    blobLogger.info({
+      msg: 'status_retrieved',
+      requestId,
+      jobId,
+      status: status.status,
+    });
+
     // If completed, download and store the video
     if (status.status === 'completed') {
-      logger.info('Video completed, downloading', { jobId });
+      blobLogger.info({
+        msg: 'downloading_video',
+        requestId,
+        jobId,
+      });
 
       try {
+        const downloadStart = Date.now();
         const videoData = await downloadVideo(jobId);
+
+        blobLogger.info({
+          msg: 'video_downloaded',
+          requestId,
+          jobId,
+          videoSize: videoData.length,
+          downloadMs: Date.now() - downloadStart,
+        });
+
+        const storeStart = Date.now();
         const videoUrl = await storeVideo(jobId, videoData);
 
-        logger.info('Video downloaded and stored successfully', { jobId });
+        blobLogger.info({
+          msg: 'video_stored',
+          requestId,
+          jobId,
+          videoUrl,
+          storeMs: Date.now() - storeStart,
+          latencyMs: Date.now() - start,
+        });
+
+        await blobLogger.flush();
 
         return {
           statusCode: 200,
@@ -80,11 +150,18 @@ export const handler: Handler = async (event: HandlerEvent) => {
       } catch (downloadError) {
         const errorMessage =
           downloadError instanceof Error ? downloadError.message : 'Unknown error';
-        logger.error('Failed to download/store video', {
+
+        blobLogger.error({
+          msg: 'download_failed',
+          requestId,
           jobId,
           error: errorMessage,
-          errorStack: downloadError instanceof Error ? downloadError.stack : undefined,
+          stack: downloadError instanceof Error ? downloadError.stack : undefined,
+          latencyMs: Date.now() - start,
         });
+
+        await blobLogger.flush();
+
         // Return error but keep status as completed so frontend knows generation succeeded
         return {
           statusCode: 500,
@@ -98,6 +175,16 @@ export const handler: Handler = async (event: HandlerEvent) => {
         };
       }
     }
+
+    blobLogger.info({
+      msg: 'request.success',
+      requestId,
+      jobId,
+      status: status.status,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     // Return current status
     return {
@@ -113,6 +200,17 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   } catch (error) {
     const errorResponse = handleApiError(error);
+
+    blobLogger.error({
+      msg: 'request.error',
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      stack: error instanceof Error ? error.stack : undefined,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     return {
       statusCode: error instanceof ValidationError ? 400 : 500,

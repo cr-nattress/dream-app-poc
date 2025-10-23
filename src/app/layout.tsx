@@ -3,8 +3,14 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 
 export const metadata: Metadata = {
-  title: 'Dream Video Generator',
+  title: {
+    default: 'Dream Video Generator',
+    template: '%s | Dream Video Generator',
+  },
   description: 'Generate AI videos from your dream descriptions using Sora 2',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

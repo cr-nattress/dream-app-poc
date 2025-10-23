@@ -3,15 +3,32 @@
  * GET /api/get-video/:jobId
  */
 
-import type { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getVideo } from '../../src/lib/blob-storage';
 import { validateJobId } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
-import { logger } from '../../src/lib/logger';
+import { BlobLogger } from '../../src/lib/blob-logger';
+import { randomUUID } from 'crypto';
 
-export const handler: Handler = async (event: HandlerEvent) => {
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  const requestId = randomUUID();
+  const blobLogger = new BlobLogger({
+    service: 'get-video',
+    env: (process.env.CONTEXT as any) || 'dev',
+  });
+
+  const start = Date.now();
+
   // Only allow GET requests
   if (event.httpMethod !== 'GET') {
+    blobLogger.warn({
+      msg: 'method_not_allowed',
+      requestId,
+      method: event.httpMethod,
+      route: event.path,
+    });
+    await blobLogger.flush();
+
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' }),
@@ -23,9 +40,25 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const pathParts = event.path.split('/');
     const jobId = pathParts[pathParts.length - 1];
 
+    blobLogger.info({
+      msg: 'request.start',
+      requestId,
+      route: event.path,
+      method: event.httpMethod,
+      jobId,
+    });
+
     // Validate job ID
     const validation = validateJobId(jobId);
     if (!validation.valid) {
+      blobLogger.warn({
+        msg: 'invalid_job_id',
+        requestId,
+        jobId,
+        error: validation.error,
+      });
+      await blobLogger.flush();
+
       throw new ValidationError(validation.error || 'Invalid job ID');
     }
 
@@ -33,7 +66,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const videoData = await getVideo(jobId);
 
     if (!videoData) {
-      logger.warn('Video not found', { jobId });
+      blobLogger.warn({
+        msg: 'video_not_found',
+        requestId,
+        jobId,
+        latencyMs: Date.now() - start,
+      });
+      await blobLogger.flush();
 
       return {
         statusCode: 404,
@@ -46,7 +85,15 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
-    logger.info('Video retrieved successfully', { jobId, size: videoData.length });
+    blobLogger.info({
+      msg: 'request.success',
+      requestId,
+      jobId,
+      videoSize: videoData.length,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     // Return video with appropriate headers
     return {
@@ -61,6 +108,17 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   } catch (error) {
     const errorResponse = handleApiError(error);
+
+    blobLogger.error({
+      msg: 'request.error',
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      stack: error instanceof Error ? error.stack : undefined,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     return {
       statusCode: error instanceof ValidationError ? 400 : 500,

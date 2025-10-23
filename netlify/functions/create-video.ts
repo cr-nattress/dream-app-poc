@@ -3,16 +3,32 @@
  * POST /api/create-video
  */
 
-import type { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createVideoJob } from '../../src/lib/sora-api';
 import { validatePrompt, validateEnvVars } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
-import { logger } from '../../src/lib/logger';
-import { fileLogger, logToAppFile } from '../../src/lib/file-logger';
+import { BlobLogger } from '../../src/lib/blob-logger';
+import { randomUUID } from 'crypto';
 
-export const handler: Handler = async (event: HandlerEvent) => {
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  const requestId = randomUUID();
+  const blobLogger = new BlobLogger({
+    service: 'create-video',
+    env: (process.env.CONTEXT as any) || 'dev',
+  });
+
+  const start = Date.now();
+
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
+    blobLogger.warn({
+      msg: 'method_not_allowed',
+      requestId,
+      method: event.httpMethod,
+      route: event.path,
+    });
+    await blobLogger.flush();
+
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' }),
@@ -20,10 +36,27 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
+    blobLogger.info({
+      msg: 'request.start',
+      requestId,
+      route: event.path,
+      method: event.httpMethod,
+      headers: {
+        userAgent: event.headers['user-agent'],
+        contentType: event.headers['content-type'],
+      },
+    });
+
     // Validate environment variables
     const envValidation = validateEnvVars();
     if (!envValidation.valid) {
-      logger.error('Environment validation failed', { error: envValidation.error });
+      blobLogger.error({
+        msg: 'env_validation_failed',
+        requestId,
+        error: envValidation.error,
+      });
+      await blobLogger.flush();
+
       return {
         statusCode: 500,
         body: JSON.stringify({ error: envValidation.error }),
@@ -32,6 +65,12 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     // Parse request body
     if (!event.body) {
+      blobLogger.warn({
+        msg: 'missing_request_body',
+        requestId,
+      });
+      await blobLogger.flush();
+
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Request body is required' }),
@@ -43,13 +82,35 @@ export const handler: Handler = async (event: HandlerEvent) => {
     // Validate prompt
     const validation = validatePrompt(prompt);
     if (!validation.valid) {
+      blobLogger.warn({
+        msg: 'prompt_validation_failed',
+        requestId,
+        error: validation.error,
+        promptLength: prompt?.length,
+      });
+      await blobLogger.flush();
+
       throw new ValidationError(validation.error || 'Invalid prompt');
     }
+
+    blobLogger.info({
+      msg: 'creating_video_job',
+      requestId,
+      promptLength: prompt.length,
+    });
 
     // Create video job
     const result = await createVideoJob(prompt);
 
-    logger.info('Video creation request successful', { jobId: result.jobId });
+    blobLogger.info({
+      msg: 'request.success',
+      requestId,
+      jobId: result.jobId,
+      status: result.status,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     return {
       statusCode: 200,
@@ -60,6 +121,17 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   } catch (error) {
     const errorResponse = handleApiError(error);
+
+    blobLogger.error({
+      msg: 'request.error',
+      requestId,
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      stack: error instanceof Error ? error.stack : undefined,
+      latencyMs: Date.now() - start,
+    });
+
+    await blobLogger.flush();
 
     return {
       statusCode: error instanceof ValidationError ? 400 : 500,

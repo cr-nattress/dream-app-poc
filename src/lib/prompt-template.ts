@@ -71,7 +71,7 @@ End with a smooth fade-out, as if the dream is slipping away on waking.`;
  */
 export function renderDreamPrompt(
   userNotes: string,
-  config?: PromptConfig
+  _config?: PromptConfig
 ): string {
   // Validate user notes
   if (!userNotes || userNotes.trim().length === 0) {
@@ -82,20 +82,20 @@ export function renderDreamPrompt(
   const sanitizedNotes = userNotes.trim();
 
   // Replace placeholder with user notes
-  let renderedPrompt = DREAM_PROMPT_TEMPLATE.replace(
+  const renderedPrompt = DREAM_PROMPT_TEMPLATE.replace(
     '{{user_dream_notes}}',
     sanitizedNotes
   );
 
   // Future: Apply configuration overrides
-  // if (config?.tone) {
-  //   renderedPrompt = applyToneOverride(renderedPrompt, config.tone);
+  // if (_config?.tone) {
+  //   renderedPrompt = applyToneOverride(renderedPrompt, _config.tone);
   // }
-  // if (config?.style) {
-  //   renderedPrompt = applyStyleOverride(renderedPrompt, config.style);
+  // if (_config?.style) {
+  //   renderedPrompt = applyStyleOverride(renderedPrompt, _config.style);
   // }
-  // if (config?.length) {
-  //   renderedPrompt = applyLengthOverride(renderedPrompt, config.length);
+  // if (_config?.length) {
+  //   renderedPrompt = applyLengthOverride(renderedPrompt, _config.length);
   // }
 
   return renderedPrompt;

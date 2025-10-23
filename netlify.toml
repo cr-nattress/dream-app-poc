@@ -2,12 +2,16 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [functions]
-  directory = "netlify/functions"
+  directory = ".netlify/functions-built"
   node_bundler = "esbuild"
+  included_files = ["src/**"]
 
 [[redirects]]
   from = "/api/*"
