@@ -64,6 +64,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
 
     // Check if video already exists in blob storage
+    blobLogger.debug({
+      msg: 'checking_blob_storage',
+      requestId,
+      jobId,
+    });
+
     const exists = await videoExists(jobId);
 
     if (exists) {
@@ -90,6 +96,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
 
     // Get status from Sora API
+    const apiCallStart = Date.now();
+    blobLogger.debug({
+      msg: 'calling_sora_api.get_status',
+      requestId,
+      jobId,
+    });
+
     const status = await getVideoStatus(jobId);
 
     blobLogger.info({
@@ -97,6 +110,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       requestId,
       jobId,
       status: status.status,
+      apiLatencyMs: Date.now() - apiCallStart,
     });
 
     // If completed, download and store the video
@@ -109,6 +123,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
 
       try {
         const downloadStart = Date.now();
+        blobLogger.debug({
+          msg: 'calling_sora_api.download_video',
+          requestId,
+          jobId,
+        });
+
         const videoData = await downloadVideo(jobId);
 
         blobLogger.info({
@@ -120,6 +140,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         });
 
         const storeStart = Date.now();
+        blobLogger.debug({
+          msg: 'storing_video_to_blob',
+          requestId,
+          jobId,
+          videoSize: videoData.length,
+        });
+
         const videoUrl = await storeVideo(jobId, videoData);
 
         blobLogger.info({
@@ -201,11 +228,16 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   } catch (error) {
     const errorResponse = handleApiError(error);
 
+    // Determine error source based on error type
+    const isValidationError = error instanceof ValidationError;
+    const errorSource = isValidationError ? 'validation' : 'sora_api_or_blob_storage';
+
     blobLogger.error({
       msg: 'request.error',
       requestId,
       error: error instanceof Error ? error.message : String(error),
       errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      errorSource,
       stack: error instanceof Error ? error.stack : undefined,
       latencyMs: Date.now() - start,
     });

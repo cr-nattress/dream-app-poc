@@ -100,7 +100,22 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     });
 
     // Create video job
+    const apiCallStart = Date.now();
+    blobLogger.debug({
+      msg: 'calling_sora_api.create_video',
+      requestId,
+      promptLength: prompt.length,
+    });
+
     const result = await createVideoJob(prompt);
+
+    blobLogger.info({
+      msg: 'sora_api.create_video.success',
+      requestId,
+      jobId: result.jobId,
+      status: result.status,
+      apiLatencyMs: Date.now() - apiCallStart,
+    });
 
     blobLogger.info({
       msg: 'request.success',
@@ -122,11 +137,16 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   } catch (error) {
     const errorResponse = handleApiError(error);
 
+    // Check if error is from Sora API or validation
+    const isValidationError = error instanceof ValidationError;
+    const errorSource = isValidationError ? 'validation' : 'sora_api';
+
     blobLogger.error({
       msg: 'request.error',
       requestId,
       error: error instanceof Error ? error.message : String(error),
       errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      errorSource,
       stack: error instanceof Error ? error.stack : undefined,
       latencyMs: Date.now() - start,
     });

@@ -3,6 +3,7 @@
  */
 
 import { CreateVideoResponse, VideoJob } from '@/types';
+import { logger } from './logger';
 
 export class ApiError extends Error {
   constructor(
@@ -18,49 +19,126 @@ export class ApiError extends Error {
  * Creates a new video generation job
  */
 export async function createVideo(prompt: string): Promise<CreateVideoResponse> {
-  const response = await fetch('/api/create-video', {
+  const startTime = Date.now();
+  logger.info('[API Client] Creating video', {
+    endpoint: '/api/create-video',
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ prompt }),
+    promptLength: prompt.length
   });
 
-  const data = await response.json();
+  try {
+    const response = await fetch('/api/create-video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
+    });
 
-  if (!response.ok) {
-    throw new ApiError(response.status, data.error || 'Failed to create video');
+    const data = await response.json();
+    const duration = Date.now() - startTime;
+
+    if (!response.ok) {
+      logger.error('[API Client] Create video failed', {
+        endpoint: '/api/create-video',
+        status: response.status,
+        error: data.error,
+        duration
+      });
+      throw new ApiError(response.status, data.error || 'Failed to create video');
+    }
+
+    logger.info('[API Client] Video created successfully', {
+      endpoint: '/api/create-video',
+      jobId: data.jobId,
+      status: data.status,
+      duration
+    });
+
+    return data;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    logger.error('[API Client] Create video request error', {
+      endpoint: '/api/create-video',
+      error: error instanceof Error ? error.message : String(error),
+      duration
+    });
+    throw error;
   }
-
-  return data;
 }
 
 /**
  * Gets the status of a video generation job
  */
 export async function getVideoStatus(jobId: string): Promise<VideoJob> {
-  const response = await fetch(`/api/video-status/${jobId}`);
+  const startTime = Date.now();
+  const endpoint = `/api/video-status/${jobId}`;
 
-  const data = await response.json();
+  logger.debug('[API Client] Fetching video status', {
+    endpoint,
+    method: 'GET',
+    jobId
+  });
 
-  if (!response.ok) {
-    throw new ApiError(response.status, data.error || 'Failed to get video status');
+  try {
+    const response = await fetch(endpoint);
+    const data = await response.json();
+    const duration = Date.now() - startTime;
+
+    if (!response.ok) {
+      logger.error('[API Client] Get video status failed', {
+        endpoint,
+        jobId,
+        status: response.status,
+        error: data.error,
+        duration
+      });
+      throw new ApiError(response.status, data.error || 'Failed to get video status');
+    }
+
+    logger.debug('[API Client] Video status fetched', {
+      endpoint,
+      jobId,
+      videoStatus: data.status,
+      hasVideoUrl: !!data.videoUrl,
+      duration
+    });
+
+    return {
+      id: data.jobId,
+      status: data.status,
+      prompt: '',
+      createdAt: data.createdAt || new Date().toISOString(),
+      completedAt: data.completedAt,
+      videoUrl: data.videoUrl,
+      error: data.error,
+    };
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    logger.error('[API Client] Get video status request error', {
+      endpoint,
+      jobId,
+      error: error instanceof Error ? error.message : String(error),
+      duration
+    });
+    throw error;
   }
-
-  return {
-    id: data.jobId,
-    status: data.status,
-    prompt: '',
-    createdAt: data.createdAt || new Date().toISOString(),
-    completedAt: data.completedAt,
-    videoUrl: data.videoUrl,
-    error: data.error,
-  };
 }
 
 /**
  * Gets the video URL for a job ID
  */
 export function getVideoUrl(jobId: string): string {
-  return `/api/get-video/${jobId}`;
+  const url = `/api/get-video/${jobId}`;
+  logger.debug('[API Client] Generated video URL', {
+    jobId,
+    url
+  });
+  return url;
 }

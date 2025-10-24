@@ -63,6 +63,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
 
     // Get video from blob storage
+    blobLogger.debug({
+      msg: 'fetching_from_blob_storage',
+      requestId,
+      jobId,
+    });
+
+    const fetchStart = Date.now();
     const videoData = await getVideo(jobId);
 
     if (!videoData) {
@@ -90,6 +97,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       requestId,
       jobId,
       videoSize: videoData.length,
+      fetchMs: Date.now() - fetchStart,
       latencyMs: Date.now() - start,
     });
 
@@ -109,11 +117,15 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   } catch (error) {
     const errorResponse = handleApiError(error);
 
+    const isValidationError = error instanceof ValidationError;
+    const errorSource = isValidationError ? 'validation' : 'blob_storage';
+
     blobLogger.error({
       msg: 'request.error',
       requestId,
       error: error instanceof Error ? error.message : String(error),
       errorType: error instanceof ValidationError ? 'validation' : 'internal',
+      errorSource,
       stack: error instanceof Error ? error.stack : undefined,
       latencyMs: Date.now() - start,
     });

@@ -5,6 +5,7 @@ import { getVideoStatus } from '@/lib/api-client';
 import { VideoJob, VideoStatus as Status } from '@/types';
 import { Spinner } from '../ui/Spinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
+import { logger } from '@/lib/logger';
 
 const POLL_INTERVAL = 10000; // 10 seconds
 
@@ -28,25 +29,62 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
+    logger.info('[VideoStatus] Starting video status polling', {
+      jobId,
+      pollInterval: POLL_INTERVAL
+    });
+
     // eslint-disable-next-line prefer-const
     let intervalId: NodeJS.Timeout | undefined;
     // eslint-disable-next-line prefer-const
     let timeIntervalId: NodeJS.Timeout | undefined;
+    let pollCount = 0;
 
     const pollStatus = async () => {
+      pollCount++;
+      logger.debug('[VideoStatus] Polling video status', {
+        jobId,
+        pollCount,
+        currentStatus: status
+      });
+
       try {
         const job: VideoJob = await getVideoStatus(jobId);
+
+        logger.debug('[VideoStatus] Status poll response', {
+          jobId,
+          pollCount,
+          status: job.status,
+          hasVideoUrl: !!job.videoUrl,
+          hasError: !!job.error
+        });
 
         setStatus(job.status);
 
         if (job.status === 'completed' && job.videoUrl) {
           if (intervalId) clearInterval(intervalId);
           if (timeIntervalId) clearInterval(timeIntervalId);
+
+          logger.info('[VideoStatus] Video completed', {
+            jobId,
+            pollCount,
+            videoUrl: job.videoUrl,
+            totalPolls: pollCount
+          });
+
           onComplete(job.videoUrl);
         } else if (job.status === 'failed') {
           if (intervalId) clearInterval(intervalId);
           if (timeIntervalId) clearInterval(timeIntervalId);
           const errorMsg = job.error || 'Video generation failed';
+
+          logger.error('[VideoStatus] Video generation failed', {
+            jobId,
+            pollCount,
+            error: errorMsg,
+            totalPolls: pollCount
+          });
+
           setError(errorMsg);
           onError(errorMsg);
         }
@@ -54,6 +92,14 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
         if (intervalId) clearInterval(intervalId);
         if (timeIntervalId) clearInterval(timeIntervalId);
         const errorMsg = err instanceof Error ? err.message : 'Failed to check status';
+
+        logger.error('[VideoStatus] Status polling error', {
+          jobId,
+          pollCount,
+          error: errorMsg,
+          totalPolls: pollCount
+        });
+
         setError(errorMsg);
         onError(errorMsg);
       }
@@ -69,6 +115,11 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
     }, 1000);
 
     return () => {
+      logger.debug('[VideoStatus] Cleaning up polling intervals', {
+        jobId,
+        totalPolls: pollCount
+      });
+
       if (intervalId) clearInterval(intervalId);
       if (timeIntervalId) clearInterval(timeIntervalId);
     };

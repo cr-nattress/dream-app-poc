@@ -8,6 +8,7 @@ import { VideoHistory } from '@/components/features/VideoHistory';
 import { createVideo } from '@/lib/api-client';
 import { saveVideoToHistory } from '@/lib/storage';
 import { VideoHistoryItem } from '@/types';
+import { logger } from '@/lib/logger';
 
 export default function HomePage() {
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
@@ -16,11 +17,21 @@ export default function HomePage() {
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateVideo = async (prompt: string) => {
+    logger.info('[HomePage] Creating video', {
+      promptLength: prompt.length
+    });
+
     setIsCreating(true);
     setVideoUrl(null);
 
     try {
+      logger.debug('[HomePage] Calling createVideo API');
       const result = await createVideo(prompt);
+
+      logger.info('[HomePage] Video creation initiated', {
+        jobId: result.jobId,
+        status: result.status
+      });
 
       setCurrentJobId(result.jobId);
       setCurrentPrompt(prompt);
@@ -33,8 +44,15 @@ export default function HomePage() {
         status: result.status,
       };
       saveVideoToHistory(historyItem);
+
+      logger.debug('[HomePage] Video saved to history', {
+        jobId: result.jobId
+      });
     } catch (error) {
-      console.error('Failed to create video:', error);
+      logger.error('[HomePage] Failed to create video', {
+        error: error instanceof Error ? error.message : String(error),
+        promptLength: prompt.length
+      });
       throw error;
     } finally {
       setIsCreating(false);
@@ -42,6 +60,11 @@ export default function HomePage() {
   };
 
   const handleVideoComplete = (url: string) => {
+    logger.info('[HomePage] Video completed', {
+      jobId: currentJobId,
+      videoUrl: url
+    });
+
     setVideoUrl(url);
 
     // Update history with completed status
@@ -55,11 +78,18 @@ export default function HomePage() {
         completedAt: new Date().toISOString(),
       };
       saveVideoToHistory(historyItem);
+
+      logger.debug('[HomePage] Updated history with completed video', {
+        jobId: currentJobId
+      });
     }
   };
 
   const handleVideoError = (error: string) => {
-    console.error('Video generation error:', error);
+    logger.error('[HomePage] Video generation error', {
+      jobId: currentJobId,
+      error
+    });
 
     // Update history with failed status
     if (currentJobId) {
@@ -70,6 +100,10 @@ export default function HomePage() {
         status: 'failed',
       };
       saveVideoToHistory(historyItem);
+
+      logger.debug('[HomePage] Updated history with failed video', {
+        jobId: currentJobId
+      });
     }
 
     // Reset state
@@ -78,6 +112,12 @@ export default function HomePage() {
   };
 
   const handleSelectHistory = (item: VideoHistoryItem) => {
+    logger.info('[HomePage] Selected history item', {
+      jobId: item.jobId,
+      status: item.status,
+      hasVideoUrl: !!item.videoUrl
+    });
+
     if (item.status === 'completed' && item.videoUrl) {
       setCurrentJobId(item.jobId);
       setCurrentPrompt(item.prompt);

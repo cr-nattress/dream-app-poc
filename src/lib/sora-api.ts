@@ -31,9 +31,19 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
     prompt: enhancedPrompt,
   };
 
-  logger.info('Creating video job', { promptLength: prompt.length });
+  logger.info('[Sora API] Creating video job', {
+    promptLength: prompt.length,
+    enhancedPromptLength: enhancedPrompt.length,
+    model: requestBody.model
+  });
 
   try {
+    const apiCallStart = Date.now();
+    logger.debug('[Sora API] Sending POST request to OpenAI', {
+      endpoint: '/videos',
+      model: requestBody.model
+    });
+
     const response = await fetch(`${OPENAI_API_BASE}/videos`, {
       method: 'POST',
       headers: {
@@ -43,8 +53,17 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
       body: JSON.stringify(requestBody),
     });
 
+    const apiLatency = Date.now() - apiCallStart;
+
     if (!response.ok) {
       const errorData: OpenAIError = await response.json();
+      logger.error('[Sora API] Create video job failed', {
+        status: response.status,
+        statusText: response.statusText,
+        errorCode: errorData.error.code,
+        errorMessage: errorData.error.message,
+        apiLatency
+      });
       throw new VideoGenerationError(
         errorData.error.message,
         errorData.error.code || 'API_ERROR'
@@ -53,7 +72,11 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
 
     const data: VideoStatusResponse = await response.json();
 
-    logger.info('Video job created', { jobId: data.id });
+    logger.info('[Sora API] Video job created successfully', {
+      jobId: data.id,
+      status: data.status,
+      apiLatency
+    });
 
     return {
       jobId: data.id,
@@ -67,7 +90,10 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
       throw error;
     }
 
-    logger.error('Failed to create video job', { error });
+    logger.error('[Sora API] Failed to create video job', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw new VideoGenerationError('Failed to create video job');
   }
 }
@@ -82,9 +108,15 @@ export async function getVideoStatus(jobId: string): Promise<VideoStatusResponse
     throw new VideoGenerationError('OPENAI_API_KEY is not configured');
   }
 
-  logger.debug('Checking video status', { jobId });
+  logger.debug('[Sora API] Checking video status', { jobId });
 
   try {
+    const apiCallStart = Date.now();
+    logger.debug('[Sora API] Sending GET request to OpenAI', {
+      endpoint: `/videos/${jobId}`,
+      jobId
+    });
+
     const response = await fetch(`${OPENAI_API_BASE}/videos/${jobId}`, {
       method: 'GET',
       headers: {
@@ -92,12 +124,27 @@ export async function getVideoStatus(jobId: string): Promise<VideoStatusResponse
       },
     });
 
+    const apiLatency = Date.now() - apiCallStart;
+
     if (!response.ok) {
       if (response.status === 404) {
+        logger.warn('[Sora API] Video job not found', {
+          jobId,
+          status: response.status,
+          apiLatency
+        });
         throw new VideoGenerationError('Video job not found', 'NOT_FOUND');
       }
 
       const errorData: OpenAIError = await response.json();
+      logger.error('[Sora API] Get video status failed', {
+        jobId,
+        status: response.status,
+        statusText: response.statusText,
+        errorCode: errorData.error.code,
+        errorMessage: errorData.error.message,
+        apiLatency
+      });
       throw new VideoGenerationError(
         errorData.error.message,
         errorData.error.code || 'API_ERROR'
@@ -106,7 +153,12 @@ export async function getVideoStatus(jobId: string): Promise<VideoStatusResponse
 
     const data: VideoStatusResponse = await response.json();
 
-    logger.debug('Video status retrieved', { jobId, status: data.status });
+    logger.debug('[Sora API] Video status retrieved', {
+      jobId,
+      status: data.status,
+      hasError: !!data.error,
+      apiLatency
+    });
 
     return data;
   } catch (error) {
@@ -114,7 +166,11 @@ export async function getVideoStatus(jobId: string): Promise<VideoStatusResponse
       throw error;
     }
 
-    logger.error('Failed to get video status', { jobId, error });
+    logger.error('[Sora API] Failed to get video status', {
+      jobId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw new VideoGenerationError('Failed to get video status');
   }
 }
@@ -129,9 +185,15 @@ export async function downloadVideo(jobId: string): Promise<Buffer> {
     throw new VideoGenerationError('OPENAI_API_KEY is not configured');
   }
 
-  logger.info('Downloading video', { jobId });
+  logger.info('[Sora API] Downloading video', { jobId });
 
   try {
+    const apiCallStart = Date.now();
+    logger.debug('[Sora API] Sending GET request to OpenAI', {
+      endpoint: `/videos/${jobId}/content`,
+      jobId
+    });
+
     const response = await fetch(`${OPENAI_API_BASE}/videos/${jobId}/content`, {
       method: 'GET',
       headers: {
@@ -139,13 +201,16 @@ export async function downloadVideo(jobId: string): Promise<Buffer> {
       },
     });
 
+    const responseLatency = Date.now() - apiCallStart;
+
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error('Download request failed', {
+      logger.error('[Sora API] Download request failed', {
         jobId,
         status: response.status,
         statusText: response.statusText,
         error: errorText,
+        responseLatency,
       });
       throw new VideoGenerationError(
         `Failed to download video: ${response.status} ${response.statusText}`,
@@ -153,10 +218,21 @@ export async function downloadVideo(jobId: string): Promise<Buffer> {
       );
     }
 
+    logger.debug('[Sora API] Reading video content', { jobId });
+
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    logger.info('Video downloaded', { jobId, size: buffer.length });
+    const totalLatency = Date.now() - apiCallStart;
+
+    logger.info('[Sora API] Video downloaded successfully', {
+      jobId,
+      size: buffer.length,
+      sizeKB: Math.round(buffer.length / 1024),
+      sizeMB: Math.round(buffer.length / 1024 / 1024 * 100) / 100,
+      responseLatency,
+      totalLatency
+    });
 
     return buffer;
   } catch (error) {
@@ -164,7 +240,11 @@ export async function downloadVideo(jobId: string): Promise<Buffer> {
       throw error;
     }
 
-    logger.error('Failed to download video', { jobId, error });
+    logger.error('[Sora API] Failed to download video', {
+      jobId,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw new VideoGenerationError('Failed to download video');
   }
 }
