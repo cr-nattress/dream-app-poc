@@ -24,14 +24,9 @@ export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
       role="region"
       aria-label="Completed dream video"
     >
-      <h2 className="text-xl font-semibold mb-4" id="video-player-heading">
-        Your Dream Video
-      </h2>
-
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-neutral-600 mb-2 font-medium">Your dream:</p>
-          <p className="text-neutral-800 italic bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-medium">
+          <p className="text-neutral-800 italic bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-medium text-center">
             &quot;{prompt}&quot;
           </p>
         </div>
@@ -42,7 +37,6 @@ export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
             className="w-full h-full object-contain"
             preload="metadata"
             aria-label={`Dream video: ${prompt}`}
-            aria-describedby="video-player-heading"
           >
             <source src={videoUrl} type="video/mp4" />
             <p>
@@ -62,15 +56,6 @@ export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
           >
             Download Video
           </Button>
-        </div>
-
-        <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-neutral-600">Job ID:</span>
-            <span className="font-mono text-neutral-800 font-medium" aria-label={`Job ID: ${jobId}`}>
-              {jobId}
-            </span>
-          </div>
         </div>
       </div>
     </article>
