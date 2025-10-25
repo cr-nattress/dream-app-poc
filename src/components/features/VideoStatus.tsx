@@ -193,18 +193,18 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
 
         {/* Engaging Tip Card - Now More Prominent */}
         <div
-          className="bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl p-6 border-2 border-primary-200 shadow-lg transition-all duration-slow"
+          className="bg-gradient-to-br from-primary-100 to-secondary-100 rounded-xl p-8 border-2 border-primary-200 shadow-lg transition-all duration-slow"
           key={currentTip.id}
         >
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-md">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-md">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-primary-700 mb-2">Dream Fact</h3>
-              <p className="text-base text-neutral-800 leading-relaxed font-medium animate-in fade-in duration-slow">
+              <h3 className="text-base font-semibold text-primary-700 mb-2">Dream Fact</h3>
+              <p className="text-lg text-neutral-800 leading-relaxed font-medium animate-in fade-in duration-slow">
                 {currentTip.tip}
               </p>
             </div>
@@ -213,7 +213,7 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
 
         {/* Progress Ring - Now Less Prominent */}
         <div className="flex flex-col items-center justify-center py-2">
-          <ProgressRing progress={progress} size="md" />
+          <ProgressRing progress={progress} size="sm" />
         </div>
 
         {/* Status and time - Live region for screen readers - Less Prominent */}
