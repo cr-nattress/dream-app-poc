@@ -123,7 +123,11 @@ export class BlobLogger {
     }
 
     try {
-      const store = getStore({ name: this.ns, siteID: process.env.NETLIFY_SITE_ID });
+      const store = getStore({
+        name: this.ns,
+        siteID: process.env.NETLIFY_SITE_ID!,
+        token: process.env.NETLIFY_BLOB_STORE_TOKEN!,
+      });
       await store.set(path, data, {
         metadata: {
           contentType: 'application/x-ndjson',
