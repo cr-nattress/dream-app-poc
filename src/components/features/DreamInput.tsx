@@ -65,11 +65,10 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
     }
 
     try {
-      // Add style prefix if a style is selected
-      let finalPrompt = prompt;
-      if (selectedStyle) {
-        finalPrompt = `[${selectedStyle} style] ${prompt}`;
-      }
+      // Add style prefix (default to "normal dream" if no style selected)
+      const style = selectedStyle || 'normal dream';
+      const finalPrompt = `[${style} style] ${prompt}`;
+
       await onSubmit(finalPrompt);
       setPrompt(''); // Clear input on success
       setSelectedStyle(null); // Clear selected style
