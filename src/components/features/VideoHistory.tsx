@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCompletedVideos, clearVideoHistory } from '@/lib/storage';
 import { VideoHistoryItem } from '@/types';
 import { Button } from '../ui/Button';
+import { EmptyState } from '../ui/EmptyState';
 
 export interface VideoHistoryProps {
   onSelect: (item: VideoHistoryItem) => void;
@@ -43,14 +44,16 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
   if (history.length === 0) {
     return (
       <section
-        className="bg-white rounded-lg shadow-md p-6"
+        className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base"
         role="region"
         aria-label="Video history"
       >
-        <h2 className="text-xl font-semibold mb-4">Your Dream Videos</h2>
-        <p className="text-gray-500 text-center py-8" role="status">
-          No videos yet. Create your first dream video above!
-        </p>
+        <h2 className="text-xl font-semibold mb-4 text-neutral-900">Your Dream Videos</h2>
+        <EmptyState
+          title="No Dream Videos Yet"
+          description="Your video journey starts here! Describe a dream above and watch it come to life in seconds."
+          showExamples={true}
+        />
       </section>
     );
   }
