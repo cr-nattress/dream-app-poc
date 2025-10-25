@@ -27,7 +27,7 @@ export function Header() {
             <img
               src="/dreamit-logo.png"
               alt="DreamIt - AI Dream Videos"
-              className="h-24 w-auto"
+              className="h-16 w-auto"
             />
           </div>
 
