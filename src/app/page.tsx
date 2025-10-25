@@ -134,12 +134,6 @@ export default function HomePage() {
     }
   };
 
-  const handleCreateNew = () => {
-    setCurrentJobId(null);
-    setCurrentPrompt('');
-    setVideoUrl(null);
-  };
-
   return (
     <>
       <div className="space-y-4 h-full flex flex-col pb-16">
@@ -163,18 +157,7 @@ export default function HomePage() {
 
             {/* Video Player - Show when completed */}
             {currentJobId && videoUrl && (
-              <>
-                <VideoPlayer videoUrl={videoUrl} jobId={currentJobId} prompt={currentPrompt} />
-
-                <div className="flex justify-center py-2">
-                  <button
-                    onClick={handleCreateNew}
-                    className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                  >
-                    ← Create Another Dream Video
-                  </button>
-                </div>
-              </>
+              <VideoPlayer videoUrl={videoUrl} jobId={currentJobId} prompt={currentPrompt} />
             )}
           </>
         )}
@@ -223,7 +206,12 @@ export default function HomePage() {
         <nav className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-around">
             <button
-              onClick={() => setCurrentTab('home')}
+              onClick={() => {
+                setCurrentTab('home');
+                setCurrentJobId(null);
+                setCurrentPrompt('');
+                setVideoUrl(null);
+              }}
               className={`flex flex-col items-center py-3 px-4 transition-colors duration-fast ${
                 currentTab === 'home'
                   ? 'text-primary-600'
