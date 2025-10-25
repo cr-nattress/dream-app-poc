@@ -29,7 +29,7 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
   const requestBody = {
     model: 'sora-2',
     prompt: enhancedPrompt,
-    seconds: '8', // Medium length (8 seconds)
+    seconds: '4', // Short length (4 seconds)
   };
 
   logger.info('[Sora API] Creating video job', {

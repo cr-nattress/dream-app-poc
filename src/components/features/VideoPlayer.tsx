@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '../ui/Button';
-
 export interface VideoPlayerProps {
   videoUrl: string;
   jobId: string;
@@ -9,15 +7,6 @@ export interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = videoUrl;
-    link.download = `dream-video-${jobId}.mp4`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <article
       className="bg-white rounded-lg shadow-md p-6"
@@ -46,16 +35,6 @@ export function VideoPlayer({ videoUrl, jobId, prompt }: VideoPlayerProps) {
               </a>
             </p>
           </video>
-        </div>
-
-        <div className="flex space-x-3">
-          <Button
-            onClick={handleDownload}
-            className="flex-1"
-            aria-label={`Download video: ${prompt}`}
-          >
-            Download Video
-          </Button>
         </div>
       </div>
     </article>

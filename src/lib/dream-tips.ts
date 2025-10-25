@@ -122,7 +122,7 @@ export const DREAM_TIPS: DreamTip[] = [
   },
   {
     id: 23,
-    tip: 'Video Tip: Your video will be 8 seconds long - perfect for capturing a dream moment!',
+    tip: 'Video Tip: Your video will be 4 seconds long - perfect for capturing a dream moment!',
     category: 'video-tip',
   },
   {
