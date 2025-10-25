@@ -111,8 +111,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       jobId,
       status: status.status,
       hasError: !!status.error,
-      errorCode: status.error?.code,
-      errorMessage: status.error?.message,
+      error: status.error,
       apiLatencyMs: Date.now() - apiCallStart,
     });
 
@@ -122,9 +121,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         msg: 'video_generation_failed',
         requestId,
         jobId,
-        errorCode: status.error.code,
-        errorMessage: status.error.message,
-        fullError: status.error,
+        error: status.error,
       });
     }
 
