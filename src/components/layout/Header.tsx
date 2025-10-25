@@ -23,13 +23,12 @@ export function Header() {
     <header className="bg-gradient-to-r from-primary-600 to-secondary-600 shadow-lg" role="banner">
       <div className="max-w-4xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              DreamIt
-            </h1>
-            <p className="text-xs text-white/80 mt-0.5">
-              AI Dream Videos
-            </p>
+          <div className="flex items-center">
+            <img
+              src="/dreamit-logo.png"
+              alt="DreamIt - AI Dream Videos"
+              className="h-10 w-auto"
+            />
           </div>
 
           <nav aria-label="Utility navigation" className="flex items-center gap-2">
