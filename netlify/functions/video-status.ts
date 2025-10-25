@@ -4,8 +4,7 @@
  */
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
-import { getVideoStatus, downloadVideo } from '../../src/lib/sora-api';
-import { storeVideo, videoExists } from '../../src/lib/blob-storage';
+import { getVideoStatus } from '../../src/lib/sora-api';
 import { validateJobId } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
 import { BlobLogger } from '../../src/lib/blob-logger';
@@ -63,38 +62,6 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       throw new ValidationError(validation.error || 'Invalid job ID');
     }
 
-    // Check if video already exists in blob storage
-    blobLogger.debug({
-      msg: 'checking_blob_storage',
-      requestId,
-      jobId,
-    });
-
-    const exists = await videoExists(jobId);
-
-    if (exists) {
-      blobLogger.info({
-        msg: 'video_cached',
-        requestId,
-        jobId,
-        latencyMs: Date.now() - start,
-      });
-      await blobLogger.flush();
-
-      return {
-        statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId,
-          status: 'completed',
-          videoUrl: `/api/get-video/${jobId}`,
-          completedAt: new Date().toISOString(),
-        }),
-      };
-    }
-
     // Get status from Sora API
     const apiCallStart = Date.now();
     blobLogger.debug({
@@ -125,94 +92,55 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       });
     }
 
-    // If completed, download and store the video
+    // If completed, return the video URL from Sora
     if (status.status === 'completed') {
-      blobLogger.info({
-        msg: 'downloading_video',
-        requestId,
-        jobId,
-      });
+      const videoUrl = status.url;
 
-      try {
-        const downloadStart = Date.now();
-        blobLogger.debug({
-          msg: 'calling_sora_api.download_video',
-          requestId,
-          jobId,
-        });
-
-        const videoData = await downloadVideo(jobId);
-
-        blobLogger.info({
-          msg: 'video_downloaded',
-          requestId,
-          jobId,
-          videoSize: videoData.length,
-          downloadMs: Date.now() - downloadStart,
-        });
-
-        const storeStart = Date.now();
-        blobLogger.debug({
-          msg: 'storing_video_to_blob',
-          requestId,
-          jobId,
-          videoSize: videoData.length,
-        });
-
-        const videoUrl = await storeVideo(jobId, videoData);
-
-        blobLogger.info({
-          msg: 'video_stored',
-          requestId,
-          jobId,
-          videoUrl,
-          storeMs: Date.now() - storeStart,
-          latencyMs: Date.now() - start,
-        });
-
-        await blobLogger.flush();
-
-        return {
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            jobId: status.id,
-            status: 'completed',
-            videoUrl,
-            completedAt: status.completed_at
-              ? new Date(status.completed_at * 1000).toISOString()
-              : new Date().toISOString(),
-          }),
-        };
-      } catch (downloadError) {
-        const errorMessage =
-          downloadError instanceof Error ? downloadError.message : 'Unknown error';
-
+      if (!videoUrl) {
         blobLogger.error({
-          msg: 'download_failed',
+          msg: 'video_completed_but_no_url',
           requestId,
           jobId,
-          error: errorMessage,
-          stack: downloadError instanceof Error ? downloadError.stack : undefined,
-          latencyMs: Date.now() - start,
         });
 
         await blobLogger.flush();
 
-        // Return error but keep status as completed so frontend knows generation succeeded
         return {
           statusCode: 500,
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            error: `Video generation completed but download failed: ${errorMessage}`,
+            error: 'Video completed but no URL provided by Sora API',
             jobId: status.id,
           }),
         };
       }
+
+      blobLogger.info({
+        msg: 'video_completed',
+        requestId,
+        jobId,
+        videoUrl,
+        latencyMs: Date.now() - start,
+      });
+
+      await blobLogger.flush();
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobId: status.id,
+          status: 'completed',
+          videoUrl,
+          completedAt: status.completed_at
+            ? new Date(status.completed_at * 1000).toISOString()
+            : new Date().toISOString(),
+        }),
+      };
     }
 
     blobLogger.info({

@@ -44,6 +44,7 @@ export interface VideoStatusResponse {
   created_at?: number;
   completed_at?: number;
   error?: string | null;
+  url?: string; // Video URL when status is 'completed'
 }
 
 /**
