@@ -68,7 +68,7 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter your dream description..."
-            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all duration-fast bg-neutral-50 focus:bg-white"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all duration-fast bg-neutral-50 focus:bg-white focus:shadow-lg focus:shadow-primary/10 hover:border-neutral-400"
             rows={5}
             disabled={isLoading}
             aria-describedby="char-count dream-info"

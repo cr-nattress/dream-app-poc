@@ -20,11 +20,11 @@ export function Button({
   className = '',
 }: ButtonProps) {
   const baseStyles =
-    'px-6 py-3 rounded-lg font-medium transition-all duration-base focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'px-6 py-3 rounded-lg font-medium transition-all duration-base focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform-gpu';
 
   const variantStyles = {
-    primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-md hover:shadow-primary active:scale-[0.98]',
-    secondary: 'bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus:ring-secondary-500 shadow-sm hover:shadow-md active:scale-[0.98]',
+    primary: 'bg-primary-600 text-white hover:bg-primary-700 hover:-translate-y-0.5 focus:ring-primary-500 shadow-md hover:shadow-lg hover:shadow-primary/50 active:scale-[0.98] active:translate-y-0',
+    secondary: 'bg-secondary-100 text-secondary-900 hover:bg-secondary-200 hover:-translate-y-0.5 focus:ring-secondary-500 shadow-sm hover:shadow-md active:scale-[0.98] active:translate-y-0',
   };
 
   return (
