@@ -112,7 +112,7 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
         )}
 
         <Button type="submit" disabled={!isValid || isLoading} loading={isLoading} className="w-full">
-          Generate Dream Video
+          Create
         </Button>
       </form>
 
