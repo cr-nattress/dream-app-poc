@@ -5,6 +5,7 @@
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getVideoStatus } from '../../src/lib/sora-api';
+import { videoExists } from '../../src/lib/blob-storage';
 import { validateJobId } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
 import { BlobLogger } from '../../src/lib/blob-logger';
@@ -60,6 +61,32 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       await blobLogger.flush();
 
       throw new ValidationError(validation.error || 'Invalid job ID');
+    }
+
+    // Check if compressed/cached version exists in blob storage
+    const cachedExists = await videoExists(jobId);
+    if (cachedExists) {
+      blobLogger.info({
+        msg: 'returning_cached_video',
+        requestId,
+        jobId,
+        latencyMs: Date.now() - start,
+      });
+      await blobLogger.flush();
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobId,
+          status: 'completed',
+          videoUrl: `/api/get-video/${jobId}`, // Return cached version
+          completedAt: new Date().toISOString(),
+          cached: true,
+        }),
+      };
     }
 
     // Get status from Sora API
@@ -123,6 +150,21 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         jobId,
         videoUrl,
         latencyMs: Date.now() - start,
+      });
+
+      // Trigger background processing to cache/compress video
+      // Fire-and-forget, don't await to avoid blocking response
+      fetch(`${process.env.URL || 'http://localhost:8888'}/api/process-video`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId: status.id, videoUrl }),
+      }).catch((err) => {
+        blobLogger.error({
+          msg: 'failed_to_trigger_background_processing',
+          requestId,
+          jobId: status.id,
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
 
       await blobLogger.flush();

@@ -30,6 +30,7 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
     model: 'sora-2',
     prompt: enhancedPrompt,
     seconds: '4', // Short length (4 seconds)
+    size: '480x854', // 480p portrait for mobile (smaller file size)
   };
 
   logger.info('[Sora API] Creating video job', {
