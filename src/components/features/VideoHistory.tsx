@@ -42,65 +42,91 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
 
   if (history.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <section
+        className="bg-white rounded-lg shadow-md p-6"
+        role="region"
+        aria-label="Video history"
+      >
         <h2 className="text-xl font-semibold mb-4">Your Dream Videos</h2>
-        <p className="text-gray-500 text-center py-8">
+        <p className="text-gray-500 text-center py-8" role="status">
           No videos yet. Create your first dream video above!
         </p>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <section
+      className="bg-white rounded-lg shadow-md p-6"
+      role="region"
+      aria-label="Video history"
+    >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Your Dream Videos</h2>
-        <Button variant="secondary" onClick={handleClear} className="text-sm py-2">
+        <h2 className="text-xl font-semibold" id="video-history-heading">
+          Your Dream Videos
+        </h2>
+        <Button
+          variant="secondary"
+          onClick={handleClear}
+          className="text-sm py-2"
+          aria-label="Clear all video history"
+        >
           Clear History
         </Button>
       </div>
 
-      <div className="space-y-2">
-        {history.map((item) => (
-          <button
-            key={item.jobId}
-            className={`w-full text-left p-4 border rounded-lg cursor-pointer transition-colors ${
-              item.jobId === currentJobId
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-            }`}
-            onClick={() => onSelect(item)}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-800 font-medium truncate">&quot;{item.prompt}&quot;</p>
-                <div className="flex items-center space-x-4 mt-2">
-                  <span className="text-xs text-gray-500">
-                    {item.completedAt
-                      ? `Completed: ${formatDate(item.completedAt)}`
-                      : formatDate(item.createdAt)}
-                  </span>
-                  <span className="text-xs text-blue-600 font-medium">👁️ View Video</span>
-                </div>
-              </div>
-
-              <svg
-                className="h-5 w-5 text-blue-500 ml-2 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      <nav aria-labelledby="video-history-heading">
+        <ul className="space-y-2" role="list">
+          {history.map((item, index) => (
+            <li key={item.jobId}>
+              <button
+                className={`w-full text-left p-4 border rounded-lg cursor-pointer transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  item.jobId === currentJobId
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+                }`}
+                onClick={() => onSelect(item)}
+                aria-label={`View video: ${item.prompt}. Completed ${formatDate(item.completedAt || item.createdAt)}`}
+                aria-current={item.jobId === currentJobId ? 'true' : undefined}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-neutral-800 font-medium truncate">&quot;{item.prompt}&quot;</p>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <time
+                        className="text-xs text-neutral-500"
+                        dateTime={item.completedAt || item.createdAt}
+                      >
+                        {item.completedAt
+                          ? `Completed: ${formatDate(item.completedAt)}`
+                          : formatDate(item.createdAt)}
+                      </time>
+                      <span className="text-xs text-primary-600 font-medium">
+                        <span aria-hidden="true">👁️</span> View Video
+                      </span>
+                    </div>
+                  </div>
+
+                  <svg
+                    className="h-5 w-5 text-primary-500 ml-2 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </section>
   );
 }

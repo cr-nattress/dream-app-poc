@@ -136,7 +136,11 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base">
+    <div
+      className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base"
+      role="region"
+      aria-label="Video generation status"
+    >
       <h2 className="text-xl font-semibold mb-4 text-neutral-900">Generating Video</h2>
 
       <div className="space-y-4">
@@ -145,12 +149,18 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
           <p className="text-neutral-800 italic bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-medium">&quot;{prompt}&quot;</p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        {/* Live region for status updates - screen readers will announce changes */}
+        <div
+          className="flex items-center space-x-3"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <Spinner size="md" />
           <div className="flex-1">
             <p className="text-neutral-700 font-medium">{STATUS_MESSAGES[status]}</p>
             <p className="text-sm text-neutral-500">
-              Elapsed time: {formatTime(elapsedTime)}
+              Elapsed time: <time dateTime={`PT${elapsedTime}S`}>{formatTime(elapsedTime)}</time>
             </p>
           </div>
         </div>
@@ -158,7 +168,7 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
         <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
           <div className="flex items-center justify-between text-sm">
             <span className="text-neutral-600">Job ID:</span>
-            <span className="font-mono text-neutral-800 font-medium">{jobId}</span>
+            <span className="font-mono text-neutral-800 font-medium" aria-label={`Job ID: ${jobId}`}>{jobId}</span>
           </div>
         </div>
 

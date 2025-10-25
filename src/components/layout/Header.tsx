@@ -19,7 +19,7 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-neutral-200">
+    <header className="bg-white shadow-sm border-b border-neutral-200" role="banner">
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex items-start justify-between">
           <div>
@@ -31,20 +31,24 @@ export function Header() {
             </p>
           </div>
 
-          <button
-            onClick={handleClearStorage}
-            className={`
-              px-4 py-2 rounded-lg font-medium text-sm transition-all duration-base
-              ${
-                showConfirm
-                  ? 'bg-error hover:bg-red-700 text-white shadow-md'
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 shadow-sm hover:shadow-md'
-              }
-            `}
-            title="Clear all video history from local storage"
-          >
-            {showConfirm ? 'Click to Confirm' : 'Clear History'}
-          </button>
+          <nav aria-label="Utility navigation">
+            <button
+              onClick={handleClearStorage}
+              className={`
+                px-4 py-2 rounded-lg font-medium text-sm transition-all duration-base
+                focus:outline-none focus:ring-2 focus:ring-offset-2
+                ${
+                  showConfirm
+                    ? 'bg-error hover:bg-red-700 text-white shadow-md focus:ring-error'
+                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 shadow-sm hover:shadow-md focus:ring-primary-500'
+                }
+              `}
+              aria-label={showConfirm ? 'Confirm clear all video history' : 'Clear all video history from local storage'}
+              aria-pressed={showConfirm}
+            >
+              {showConfirm ? 'Click to Confirm' : 'Clear History'}
+            </button>
+          </nav>
         </div>
       </div>
     </header>
