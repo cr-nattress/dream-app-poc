@@ -14,6 +14,34 @@ const EXAMPLE_PROMPTS = [
   'Walking through a forest where trees are made of crystal',
 ];
 
+const DREAM_STYLES = [
+  {
+    emoji: '🌑',
+    name: 'Nightmare',
+    description: 'Distorted, disorienting, tense with sharp contrast and flickering lights',
+  },
+  {
+    emoji: '🌌',
+    name: 'Surreal',
+    description: 'Otherworldly, illogical, dreamlike with floating objects and impossible geometry',
+  },
+  {
+    emoji: '✨',
+    name: 'Vivid',
+    description: 'Hyper-real, emotional, cinematic clarity with rich saturation',
+  },
+  {
+    emoji: '🕯',
+    name: 'Dark / Gothic',
+    description: 'Brooding, mysterious, shadow-heavy with candlelight and mist',
+  },
+  {
+    emoji: '☁️',
+    name: 'Ethereal',
+    description: 'Soft, weightless, peaceful with hazy glows and flowing fabrics',
+  },
+];
+
 export interface DreamInputProps {
   onSubmit: (prompt: string) => Promise<void>;
   isLoading: boolean;
@@ -22,6 +50,7 @@ export interface DreamInputProps {
 export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
   const [prompt, setPrompt] = useState('');
   const [error, setError] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
 
   const charCount = prompt.length;
   const isValid = charCount >= MIN_LENGTH && charCount <= MAX_LENGTH;
@@ -36,8 +65,14 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
     }
 
     try {
-      await onSubmit(prompt);
+      // Add style prefix if a style is selected
+      let finalPrompt = prompt;
+      if (selectedStyle) {
+        finalPrompt = `[${selectedStyle} style] ${prompt}`;
+      }
+      await onSubmit(finalPrompt);
       setPrompt(''); // Clear input on success
+      setSelectedStyle(null); // Clear selected style
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create video');
     }
@@ -46,6 +81,10 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
   const useExample = () => {
     const randomPrompt = EXAMPLE_PROMPTS[Math.floor(Math.random() * EXAMPLE_PROMPTS.length)];
     setPrompt(randomPrompt);
+  };
+
+  const handleStyleClick = (styleName: string) => {
+    setSelectedStyle(selectedStyle === styleName ? null : styleName);
   };
 
   return (
@@ -57,6 +96,31 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
       <h2 className="text-xl font-semibold mb-4 text-neutral-900" id="dream-input-heading">
         Describe Your Dream
       </h2>
+
+      {/* Dream Style Buttons */}
+      <div className="mb-4">
+        <p className="text-sm text-neutral-600 mb-2">Choose a style (optional):</p>
+        <div className="flex flex-wrap gap-2">
+          {DREAM_STYLES.map((style) => (
+            <button
+              key={style.name}
+              type="button"
+              onClick={() => handleStyleClick(style.name)}
+              disabled={isLoading}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-fast border-2 ${
+                selectedStyle === style.name
+                  ? 'bg-primary-100 border-primary-500 text-primary-700'
+                  : 'bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-100'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              aria-pressed={selectedStyle === style.name}
+              title={style.description}
+            >
+              <span className="mr-1">{style.emoji}</span>
+              {style.name}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="dream-input-heading">
         <div>
