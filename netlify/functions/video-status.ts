@@ -110,8 +110,23 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       requestId,
       jobId,
       status: status.status,
+      hasError: !!status.error,
+      errorCode: status.error?.code,
+      errorMessage: status.error?.message,
       apiLatencyMs: Date.now() - apiCallStart,
     });
+
+    // If failed, log the error details
+    if (status.status === 'failed' && status.error) {
+      blobLogger.error({
+        msg: 'video_generation_failed',
+        requestId,
+        jobId,
+        errorCode: status.error.code,
+        errorMessage: status.error.message,
+        fullError: status.error,
+      });
+    }
 
     // If completed, download and store the video
     if (status.status === 'completed') {

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export interface VideoThumbnailProps {
   videoUrl?: string;
   thumbnailUrl?: string;
@@ -8,7 +10,7 @@ export interface VideoThumbnailProps {
 }
 
 export function VideoThumbnail({
-  videoUrl,
+  videoUrl: _videoUrl,
   thumbnailUrl,
   prompt,
   duration = 8,
@@ -31,10 +33,12 @@ export function VideoThumbnail({
       {/* Thumbnail or Placeholder */}
       <div className="absolute inset-0">
         {thumbnailUrl ? (
-          <img
+          <Image
             src={thumbnailUrl}
             alt={`Thumbnail for: ${prompt}`}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
           />
         ) : (
           /* Placeholder with gradient */

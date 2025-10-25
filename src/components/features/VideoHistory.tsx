@@ -64,14 +64,17 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
 
   return (
     <section
-      className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base"
+      className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 flex flex-col h-full transition-shadow duration-base"
       role="region"
       aria-label="Video history"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-neutral-900" id="video-history-heading">
-          Your Dream Videos
-        </h2>
+      <div className="flex items-center justify-between p-4 border-b border-neutral-200 flex-shrink-0">
+        {history.length > 1 && (
+          <h2 className="text-lg font-semibold text-neutral-900" id="video-history-heading">
+            Your Dream Videos
+          </h2>
+        )}
+        {history.length === 1 && <div />}
 
         <div className="flex items-center gap-2">
           {/* View Mode Toggle */}
@@ -117,7 +120,7 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
         </div>
       </div>
 
-      <nav aria-labelledby="video-history-heading">
+      <nav aria-labelledby="video-history-heading" className="flex-1 overflow-y-auto p-4">
         {/* Grid View */}
         {viewMode === 'grid' ? (
           <VideoThumbnailGrid>
@@ -138,7 +141,7 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
             {history.map((item) => (
               <li key={item.jobId}>
                 <button
-                  className={`w-full text-left p-4 border rounded-lg cursor-pointer transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                  className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
                     item.jobId === currentJobId
                       ? 'border-primary-500 bg-primary-50'
                       : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
@@ -149,24 +152,24 @@ export function VideoHistory({ onSelect, currentJobId }: VideoHistoryProps) {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-neutral-800 font-medium truncate">&quot;{item.prompt}&quot;</p>
-                      <div className="flex items-center space-x-4 mt-2">
+                      <p className="text-neutral-800 font-medium truncate text-sm">&quot;{item.prompt}&quot;</p>
+                      <div className="flex items-center space-x-3 mt-1">
                         <time
                           className="text-xs text-neutral-500"
                           dateTime={item.completedAt || item.createdAt}
                         >
                           {item.completedAt
-                            ? `Completed: ${formatDate(item.completedAt)}`
+                            ? `${formatDate(item.completedAt)}`
                             : formatDate(item.createdAt)}
                         </time>
                         <span className="text-xs text-primary-600 font-medium">
-                          <span aria-hidden="true">👁️</span> View Video
+                          View
                         </span>
                       </div>
                     </div>
 
                     <svg
-                      className="h-5 w-5 text-primary-500 ml-2 flex-shrink-0"
+                      className="h-4 w-4 text-primary-500 ml-2 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

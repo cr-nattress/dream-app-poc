@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,8 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="antialiased bg-neutral-50 text-neutral-900 font-sans">
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#8b5cf6" />
+      </head>
+      <body className="antialiased bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 font-sans transition-colors duration-base overflow-hidden" suppressHydrationWarning>
         {/* Skip to main content link for keyboard navigation */}
         <a
           href="#main-content"
@@ -37,14 +42,17 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        <ErrorBoundary>
-          <div className="min-h-screen">
-            <Header />
-            <main id="main-content" className="max-w-4xl mx-auto px-4 py-8" role="main" aria-label="Main content">
-              {children}
-            </main>
-          </div>
-        </ErrorBoundary>
+        <ThemeProvider>
+          <ErrorBoundary>
+            <div className="h-screen flex flex-col">
+              <Header />
+              <main id="main-content" className="flex-1 overflow-y-auto max-w-4xl w-full mx-auto px-4 py-4" role="main" aria-label="Main content">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   );

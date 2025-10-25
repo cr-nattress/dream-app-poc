@@ -136,7 +136,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 h-full flex flex-col">
       {/* Input Form - Only show if not currently processing */}
       {!currentJobId && (
         <DreamInput onSubmit={handleCreateVideo} isLoading={isCreating} />
@@ -157,10 +157,10 @@ export default function HomePage() {
         <>
           <VideoPlayer videoUrl={videoUrl} jobId={currentJobId} prompt={currentPrompt} />
 
-          <div className="flex justify-center">
+          <div className="flex justify-center py-2">
             <button
               onClick={handleCreateNew}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
             >
               ← Create Another Dream Video
             </button>
@@ -169,7 +169,9 @@ export default function HomePage() {
       )}
 
       {/* Video History */}
-      <VideoHistory onSelect={handleSelectHistory} currentJobId={currentJobId || undefined} />
+      <div className="flex-1 overflow-hidden">
+        <VideoHistory onSelect={handleSelectHistory} currentJobId={currentJobId || undefined} />
+      </div>
     </div>
   );
 }

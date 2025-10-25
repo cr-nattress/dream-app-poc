@@ -27,6 +27,8 @@ export class BlobLogger {
   private readonly common: Record<string, string | undefined>;
   private readonly deployId: string | undefined;
   private flushed = false;
+  private static exitHandlerRegistered = false;
+  private static instances: BlobLogger[] = [];
 
   constructor(opts: LoggerOptions = {}) {
     this.ns = opts.namespace || 'app-logs';
@@ -40,11 +42,18 @@ export class BlobLogger {
       deployId: this.deployId,
     };
 
-    // Flush on process end when running in Node
-    if (typeof process !== 'undefined') {
+    // Register this instance
+    BlobLogger.instances.push(this);
+
+    // Register exit handler only once for all instances
+    if (typeof process !== 'undefined' && !BlobLogger.exitHandlerRegistered) {
+      BlobLogger.exitHandlerRegistered = true;
       process.on('beforeExit', () => {
-        if (!this.flushed) {
-          this.flush().catch(() => {});
+        // Flush all instances
+        for (const instance of BlobLogger.instances) {
+          if (!instance.flushed) {
+            instance.flush().catch(() => {});
+          }
         }
       });
     }
@@ -100,6 +109,19 @@ export class BlobLogger {
     this.buffer = [];
     this.flushed = true;
 
+    // Check if Netlify Blobs environment is configured
+    const hasBlobs = process.env.NETLIFY_SITE_ID && process.env.NETLIFY_BLOB_STORE_TOKEN;
+
+    if (!hasBlobs) {
+      // Fallback to console logging in local dev without blob store
+      if (this.common.env === 'dev') {
+        // In dev mode, just log to console silently (don't spam with warnings)
+        return;
+      }
+      console.log('[BlobLogger] Log data:', data);
+      return;
+    }
+
     try {
       const store = getStore({ name: this.ns, siteID: process.env.NETLIFY_SITE_ID });
       await store.set(path, data, {
@@ -108,7 +130,7 @@ export class BlobLogger {
         },
       });
     } catch (err) {
-      // Fallback to console if blob write fails (e.g., in local dev without proper setup)
+      // Fallback to console if blob write fails
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error('[BlobLogger] Failed to write to blob store:', errorMessage);
       console.log('[BlobLogger] Log data:', data);

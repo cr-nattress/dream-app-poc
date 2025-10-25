@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 export function Header() {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -19,34 +20,35 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-neutral-200" role="banner">
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-start justify-between">
+    <header className="bg-gradient-to-r from-primary-600 to-secondary-600 shadow-lg" role="banner">
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-white">
               DreamIt
             </h1>
-            <p className="text-sm text-neutral-600 mt-1">
-              Create AI videos from your dream descriptions
+            <p className="text-xs text-white/80 mt-0.5">
+              AI Dream Videos
             </p>
           </div>
 
-          <nav aria-label="Utility navigation">
+          <nav aria-label="Utility navigation" className="flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={handleClearStorage}
               className={`
-                px-4 py-2 rounded-lg font-medium text-sm transition-all duration-base
-                focus:outline-none focus:ring-2 focus:ring-offset-2
+                px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-base
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/30
                 ${
                   showConfirm
-                    ? 'bg-error hover:bg-red-700 text-white shadow-md focus:ring-error'
-                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 shadow-sm hover:shadow-md focus:ring-primary-500'
+                    ? 'bg-red-600 hover:bg-red-700 text-white shadow-md'
+                    : 'bg-white/20 hover:bg-white/30 text-white shadow-sm backdrop-blur-sm'
                 }
               `}
               aria-label={showConfirm ? 'Confirm clear all video history' : 'Clear all video history from local storage'}
               aria-pressed={showConfirm}
             >
-              {showConfirm ? 'Click to Confirm' : 'Clear History'}
+              {showConfirm ? 'Confirm' : 'Clear'}
             </button>
           </nav>
         </div>
