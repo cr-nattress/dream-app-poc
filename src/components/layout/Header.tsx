@@ -8,7 +8,7 @@ export function Header() {
           <img
             src="/dreamit-logo.png"
             alt="DreamIt - AI Dream Videos"
-            className="h-16 w-auto"
+            className="h-12 w-auto"
           />
         </div>
       </div>
