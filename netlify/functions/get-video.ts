@@ -128,13 +128,18 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
 
     await blobLogger.flush();
 
-    // Return video with appropriate headers
+    // Return video with CDN-optimized cache headers
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'video/mp4',
-        'Content-Disposition': `attachment; filename="dream-video-${jobId}.mp4"`,
-        'Cache-Control': 'public, max-age=31536000',
+        'Content-Disposition': `inline; filename="dream-video-${jobId}.mp4"`,
+        // Browser cache: always check with CDN
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        // Netlify CDN: cache for 1 year with durable storage
+        'Netlify-CDN-Cache-Control': 'public, s-maxage=31536000, durable, must-revalidate',
+        // Enable range requests for video seeking
+        'Accept-Ranges': 'bytes',
       } as Record<string, string>,
       body: videoData.toString('base64'),
       isBase64Encoded: true,

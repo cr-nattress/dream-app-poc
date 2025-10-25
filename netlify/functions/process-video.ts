@@ -7,6 +7,7 @@
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { storeVideo } from '../../src/lib/blob-storage';
+import { compressVideo } from '../../src/lib/video-compressor';
 import { handleApiError } from '../../src/lib/errors';
 import { BlobLogger } from '../../src/lib/blob-logger';
 import { randomUUID } from 'crypto';
@@ -92,20 +93,40 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       downloadMs: Date.now() - downloadStart,
     });
 
-    // TODO: Add compression here if needed
-    // For now, we're just caching the 480p video from Sora
-    // const compressedBuffer = await compressVideo(videoBuffer);
+    // Compress video with CRF 23 (60-70% size reduction)
+    const compressionStart = Date.now();
+    blobLogger.debug({
+      msg: 'compressing_video',
+      requestId,
+      jobId,
+      originalSize: videoBuffer.length,
+    });
 
-    // Store in Netlify Blobs
+    const compressedBuffer = await compressVideo(videoBuffer);
+
+    const compressionRatio = ((1 - compressedBuffer.length / videoBuffer.length) * 100).toFixed(1);
+    blobLogger.info({
+      msg: 'video_compressed',
+      requestId,
+      jobId,
+      originalSize: videoBuffer.length,
+      compressedSize: compressedBuffer.length,
+      originalSizeMB: Math.round(videoBuffer.length / 1024 / 1024 * 100) / 100,
+      compressedSizeMB: Math.round(compressedBuffer.length / 1024 / 1024 * 100) / 100,
+      compressionRatio: `${compressionRatio}%`,
+      compressionMs: Date.now() - compressionStart,
+    });
+
+    // Store compressed video in Netlify Blobs
     const storeStart = Date.now();
     blobLogger.debug({
       msg: 'storing_video',
       requestId,
       jobId,
-      size: videoBuffer.length,
+      size: compressedBuffer.length,
     });
 
-    const storedUrl = await storeVideo(jobId, videoBuffer);
+    const storedUrl = await storeVideo(jobId, compressedBuffer);
 
     blobLogger.info({
       msg: 'video_stored',

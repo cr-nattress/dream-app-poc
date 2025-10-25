@@ -31,9 +31,10 @@ async function getFFmpeg(): Promise<FFmpeg> {
 }
 
 export interface CompressionOptions {
-  crf?: number; // Quality: 23-28 recommended (higher = smaller file, lower quality)
+  crf?: number; // Quality: 18-23 recommended (higher = smaller file, lower quality)
   preset?: 'ultrafast' | 'fast' | 'medium' | 'slow';
   maxDimension?: number; // Scale down if larger than this
+  audioBitrate?: string; // Audio bitrate (e.g., '64k', '96k')
 }
 
 /**
@@ -48,9 +49,10 @@ export async function compressVideo(
   options: CompressionOptions = {}
 ): Promise<Buffer> {
   const {
-    crf = 28, // Higher compression for mobile
-    preset = 'fast',
-    maxDimension = 854, // Match our 480p height
+    crf = 23, // Sweet spot for quality/size (industry standard for web)
+    preset = 'medium', // Better compression than 'fast'
+    maxDimension = 854, // Match our 720p height
+    audioBitrate = '64k', // Lower audio bitrate for mobile
   } = options;
 
   const startTime = Date.now();
@@ -73,9 +75,10 @@ export async function compressVideo(
     logger.debug('[Video Compressor] Running FFmpeg compression');
 
     // Compress with H.264, optimized for mobile playback
-    // - CRF for quality/size balance
+    // - CRF 23 for quality/size balance (industry standard)
+    // - medium preset for better compression
     // - fastdecode tune for mobile playback
-    // - AAC audio at lower bitrate
+    // - AAC audio at 64k for mobile
     // - faststart for web playback
     await ffmpeg.exec([
       '-i', 'input.mp4',
@@ -85,7 +88,7 @@ export async function compressVideo(
       '-tune', 'fastdecode',
       '-vf', `scale='min(${maxDimension},iw)':min(${maxDimension},ih):force_original_aspect_ratio=decrease`,
       '-c:a', 'aac',
-      '-b:a', '96k',
+      '-b:a', audioBitrate,
       '-movflags', '+faststart',
       'output.mp4',
     ]);
