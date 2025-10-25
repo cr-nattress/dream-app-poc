@@ -176,7 +176,7 @@ export default function HomePage() {
             <div className="space-y-4 text-neutral-700">
               <p>
                 DreamIt transforms your dream descriptions into stunning AI-generated videos using Sora 2,
-                OpenAI's state-of-the-art video generation model.
+                OpenAI&apos;s state-of-the-art video generation model.
               </p>
               <p>
                 Simply describe your dream, choose a visual style, and watch as AI brings your imagination to life
