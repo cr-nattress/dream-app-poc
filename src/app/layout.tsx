@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,12 +37,14 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        <div className="min-h-screen">
-          <Header />
-          <main id="main-content" className="max-w-4xl mx-auto px-4 py-8" role="main" aria-label="Main content">
-            {children}
-          </main>
-        </div>
+        <ErrorBoundary>
+          <div className="min-h-screen">
+            <Header />
+            <main id="main-content" className="max-w-4xl mx-auto px-4 py-8" role="main" aria-label="Main content">
+              {children}
+            </main>
+          </div>
+        </ErrorBoundary>
       </body>
     </html>
   );

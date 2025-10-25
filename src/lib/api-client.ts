@@ -4,6 +4,7 @@
 
 import { CreateVideoResponse, VideoJob } from '@/types';
 import { logger } from './logger';
+import { retry } from './retry';
 
 export class ApiError extends Error {
   constructor(
@@ -17,6 +18,7 @@ export class ApiError extends Error {
 
 /**
  * Creates a new video generation job
+ * Automatically retries on network errors and server errors (5xx)
  */
 export async function createVideo(prompt: string): Promise<CreateVideoResponse> {
   const startTime = Date.now();
@@ -27,13 +29,25 @@ export async function createVideo(prompt: string): Promise<CreateVideoResponse> 
   });
 
   try {
-    const response = await fetch('/api/create-video', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
-    });
+    const response = await retry(
+      () => fetch('/api/create-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      }),
+      {
+        maxAttempts: 3,
+        initialDelay: 1000,
+        onRetry: (attempt, error) => {
+          logger.warn('[API Client] Retrying create video request', {
+            attempt,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        },
+      }
+    );
 
     const data = await response.json();
     const duration = Date.now() - startTime;
@@ -72,6 +86,7 @@ export async function createVideo(prompt: string): Promise<CreateVideoResponse> 
 
 /**
  * Gets the status of a video generation job
+ * Automatically retries on network errors and server errors (5xx)
  */
 export async function getVideoStatus(jobId: string): Promise<VideoJob> {
   const startTime = Date.now();
@@ -84,7 +99,19 @@ export async function getVideoStatus(jobId: string): Promise<VideoJob> {
   });
 
   try {
-    const response = await fetch(endpoint);
+    const response = await retry(
+      () => fetch(endpoint),
+      {
+        maxAttempts: 3,
+        initialDelay: 500,
+        onRetry: (attempt) => {
+          logger.debug('[API Client] Retrying get video status', {
+            attempt,
+            jobId,
+          });
+        },
+      }
+    );
     const data = await response.json();
     const duration = Date.now() - startTime;
 
