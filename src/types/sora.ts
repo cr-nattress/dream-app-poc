@@ -9,12 +9,20 @@ export type SoraModel = 'sora-2' | 'sora-2-pro';
 export type VideoResolution = '720p' | '1080p' | '1024p';
 
 /**
+ * Valid duration values for Sora video generation
+ * "4" = 4 seconds (default)
+ * "8" = 8 seconds (medium)
+ * "12" = 12 seconds (maximum)
+ */
+export type VideoDuration = '4' | '8' | '12';
+
+/**
  * Request to create a new video generation job
  */
 export interface CreateVideoRequest {
   model: SoraModel;
   prompt: string;
-  duration?: number;
+  seconds?: VideoDuration;
   resolution?: VideoResolution;
 }
 

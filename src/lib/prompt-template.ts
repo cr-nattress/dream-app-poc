@@ -15,7 +15,7 @@ export interface PromptConfig {
   /** Visual style approach (future: user-selectable) */
   style?: 'realistic' | 'surreal' | 'abstract';
   /** Target video length (future: user-selectable) */
-  length?: '15s' | '30s' | '60s';
+  length?: '4s' | '8s' | '12s';
   /** Custom mood override (future: user input) */
   mood?: string;
   // Future: add more configurable parameters
@@ -33,7 +33,7 @@ export interface PromptConfig {
  * - Visual style (cinematic realism + surreal effects)
  * - Camera movement (slow, fluid, dreamlike)
  * - Sound direction (ambient, emotional)
- * - Length specification (15-30 seconds)
+ * - Length specification (8 seconds - medium duration)
  * - Ending instruction (fade-out)
  *
  * Placeholder: {{user_dream_notes}} - replaced with user's dream description
@@ -52,7 +52,7 @@ Camera: slow, fluid movement — like the viewer is drifting through the dream. 
 
 Sound: ambient, emotional score — matching the tone of the dream.
 
-Length: 15–30 seconds.
+Length: 8 seconds.
 
 End with a smooth fade-out, as if the dream is slipping away on waking.`;
 

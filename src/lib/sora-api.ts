@@ -29,12 +29,14 @@ export async function createVideoJob(prompt: string): Promise<CreateVideoRespons
   const requestBody = {
     model: 'sora-2',
     prompt: enhancedPrompt,
+    seconds: '8', // Medium length (8 seconds)
   };
 
   logger.info('[Sora API] Creating video job', {
     promptLength: prompt.length,
     enhancedPromptLength: enhancedPrompt.length,
-    model: requestBody.model
+    model: requestBody.model,
+    duration: requestBody.seconds
   });
 
   try {
