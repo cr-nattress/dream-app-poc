@@ -93,13 +93,8 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
       role="region"
       aria-label="Dream video creation form"
     >
-      <h2 className="text-xl font-semibold mb-4 text-neutral-900" id="dream-input-heading">
-        Describe Your Dream
-      </h2>
-
       {/* Dream Style Buttons */}
       <div className="mb-4">
-        <p className="text-sm text-neutral-600 mb-2">Choose a style (optional):</p>
         <div className="flex flex-wrap gap-2">
           {DREAM_STYLES.map((style) => (
             <button
@@ -131,7 +126,7 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
             id="dream-prompt"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter your dream description..."
+            placeholder="Tell me about your dream..."
             className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all duration-fast bg-neutral-50 focus:bg-white focus:shadow-lg focus:shadow-primary/10 hover:border-neutral-400"
             rows={5}
             disabled={isLoading}
