@@ -136,33 +136,33 @@ export function VideoStatus({ jobId, prompt, onComplete, onError }: VideoStatusP
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Generating Video</h2>
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base">
+      <h2 className="text-xl font-semibold mb-4 text-neutral-900">Generating Video</h2>
 
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-gray-600 mb-2">Your dream:</p>
-          <p className="text-gray-800 italic">&quot;{prompt}&quot;</p>
+          <p className="text-sm text-neutral-600 mb-2 font-medium">Your dream:</p>
+          <p className="text-neutral-800 italic bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent font-medium">&quot;{prompt}&quot;</p>
         </div>
 
         <div className="flex items-center space-x-3">
           <Spinner size="md" />
           <div className="flex-1">
-            <p className="text-gray-700 font-medium">{STATUS_MESSAGES[status]}</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-neutral-700 font-medium">{STATUS_MESSAGES[status]}</p>
+            <p className="text-sm text-neutral-500">
               Elapsed time: {formatTime(elapsedTime)}
             </p>
           </div>
         </div>
 
-        <div className="bg-gray-100 rounded-lg p-3">
+        <div className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Job ID:</span>
-            <span className="font-mono text-gray-800">{jobId}</span>
+            <span className="text-neutral-600">Job ID:</span>
+            <span className="font-mono text-neutral-800 font-medium">{jobId}</span>
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-neutral-500 text-center">
           Status updates every 10 seconds. This usually takes 3-5 minutes...
         </p>
       </div>

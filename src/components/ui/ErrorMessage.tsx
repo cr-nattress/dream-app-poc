@@ -5,9 +5,9 @@ export interface ErrorMessageProps {
 
 export function ErrorMessage({ message, onDismiss }: ErrorMessageProps) {
   return (
-    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start">
+    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start shadow-sm animate-in fade-in slide-in-from-top-2 duration-base">
       <svg
-        className="h-5 w-5 text-red-400 mr-3 mt-0.5"
+        className="h-5 w-5 text-red-400 mr-3 mt-0.5 flex-shrink-0"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
@@ -19,12 +19,12 @@ export function ErrorMessage({ message, onDismiss }: ErrorMessageProps) {
         />
       </svg>
       <div className="flex-1">
-        <p className="text-sm">{message}</p>
+        <p className="text-sm font-medium">{message}</p>
       </div>
       {onDismiss && (
         <button
           onClick={onDismiss}
-          className="ml-3 text-red-400 hover:text-red-600 focus:outline-none"
+          className="ml-3 text-red-400 hover:text-red-600 focus:outline-none transition-colors duration-fast"
         >
           <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path

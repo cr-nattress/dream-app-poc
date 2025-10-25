@@ -49,8 +49,8 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Describe Your Dream</h2>
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg border border-neutral-200 p-6 transition-shadow duration-base">
+      <h2 className="text-xl font-semibold mb-4 text-neutral-900">Describe Your Dream</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -58,19 +58,19 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter your dream description..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none transition-all duration-fast bg-neutral-50 focus:bg-white"
             rows={5}
             disabled={isLoading}
           />
 
           <div className="flex justify-between items-center mt-2">
             <p
-              className={`text-sm ${
+              className={`text-sm font-medium transition-colors duration-fast ${
                 charCount > MAX_LENGTH
-                  ? 'text-red-600'
+                  ? 'text-error'
                   : charCount >= MIN_LENGTH
-                    ? 'text-green-600'
-                    : 'text-gray-500'
+                    ? 'text-success'
+                    : 'text-neutral-500'
               }`}
             >
               {charCount} / {MAX_LENGTH} characters
@@ -79,7 +79,7 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
             <button
               type="button"
               onClick={useExample}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors duration-fast disabled:opacity-50"
               disabled={isLoading}
             >
               Use example
@@ -94,8 +94,9 @@ export function DreamInput({ onSubmit, isLoading }: DreamInputProps) {
         </Button>
       </form>
 
-      <p className="text-xs text-gray-500 mt-4">
-        ⏱️ Video generation takes approximately 3-5 minutes
+      <p className="text-xs text-neutral-500 mt-4 flex items-center gap-1">
+        <span>⏱️</span>
+        <span>Video generation takes approximately 3-5 minutes</span>
       </p>
     </div>
   );
