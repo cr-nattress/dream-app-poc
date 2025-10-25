@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
@@ -49,7 +48,6 @@ export default function RootLayout({
               <main id="main-content" className="flex-1 overflow-y-auto max-w-4xl w-full mx-auto px-4 py-4" role="main" aria-label="Main content">
                 {children}
               </main>
-              <Footer />
             </div>
           </ErrorBoundary>
         </ThemeProvider>
