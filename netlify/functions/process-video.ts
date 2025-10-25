@@ -36,20 +36,19 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   }
 
   try {
-    const { jobId, videoUrl } = JSON.parse(event.body || '{}');
+    const { jobId } = JSON.parse(event.body || '{}');
 
-    if (!jobId || !videoUrl) {
+    if (!jobId) {
       blobLogger.warn({
         msg: 'missing_parameters',
         requestId,
         hasJobId: !!jobId,
-        hasVideoUrl: !!videoUrl,
       });
       await blobLogger.flush();
 
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing jobId or videoUrl' }),
+        body: JSON.stringify({ error: 'Missing jobId' }),
       };
     }
 
@@ -57,11 +56,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       msg: 'processing_video',
       requestId,
       jobId,
-      videoUrl,
     });
 
-    // Download video from Sora URL
+    // Download video from OpenAI's content endpoint
     const downloadStart = Date.now();
+    const apiKey = process.env.OPENAI_API_KEY;
+    const videoUrl = `https://api.openai.com/v1/videos/${jobId}/content`;
+
     blobLogger.debug({
       msg: 'downloading_video',
       requestId,
@@ -69,7 +70,11 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       videoUrl,
     });
 
-    const response = await fetch(videoUrl);
+    const response = await fetch(videoUrl, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to download video: ${response.status} ${response.statusText}`);

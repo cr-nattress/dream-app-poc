@@ -119,30 +119,11 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       });
     }
 
-    // If completed, return the video URL from Sora
+    // If completed, return the OpenAI content endpoint URL
     if (status.status === 'completed') {
-      const videoUrl = status.url;
-
-      if (!videoUrl) {
-        blobLogger.error({
-          msg: 'video_completed_but_no_url',
-          requestId,
-          jobId,
-        });
-
-        await blobLogger.flush();
-
-        return {
-          statusCode: 500,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            error: 'Video completed but no URL provided by Sora API',
-            jobId: status.id,
-          }),
-        };
-      }
+      // Sora doesn't return a direct URL - videos are accessed via content endpoint
+      // We'll use our get-video function to proxy the download
+      const videoUrl = `/api/get-video/${status.id}`;
 
       blobLogger.info({
         msg: 'video_completed',
@@ -152,12 +133,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         latencyMs: Date.now() - start,
       });
 
-      // Trigger background processing to cache/compress video
+      // Trigger background processing to cache video in blob storage
       // Fire-and-forget, don't await to avoid blocking response
       fetch(`${process.env.URL || 'http://localhost:8888'}/api/process-video`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jobId: status.id, videoUrl }),
+        body: JSON.stringify({ jobId: status.id }),
       }).catch((err) => {
         blobLogger.error({
           msg: 'failed_to_trigger_background_processing',

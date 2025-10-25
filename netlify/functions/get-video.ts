@@ -5,6 +5,7 @@
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getVideo } from '../../src/lib/blob-storage';
+import { downloadVideo } from '../../src/lib/sora-api';
 import { validateJobId } from '../../src/lib/validators';
 import { handleApiError, ValidationError } from '../../src/lib/errors';
 import { BlobLogger } from '../../src/lib/blob-logger';
@@ -62,7 +63,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       throw new ValidationError(validation.error || 'Invalid job ID');
     }
 
-    // Get video from blob storage
+    // Try to get video from blob storage first (cached)
     blobLogger.debug({
       msg: 'fetching_from_blob_storage',
       requestId,
@@ -70,26 +71,49 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     });
 
     const fetchStart = Date.now();
-    const videoData = await getVideo(jobId);
+    let videoData = await getVideo(jobId);
+    let source = 'blob_storage';
 
+    // If not cached, download from OpenAI
     if (!videoData) {
-      blobLogger.warn({
-        msg: 'video_not_found',
+      blobLogger.info({
+        msg: 'video_not_cached_downloading_from_openai',
         requestId,
         jobId,
-        latencyMs: Date.now() - start,
       });
-      await blobLogger.flush();
 
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          error: `Video not found for job ID: ${jobId}`,
-        }),
-      };
+      try {
+        const downloadStart = Date.now();
+        videoData = await downloadVideo(jobId);
+        source = 'openai_api';
+
+        blobLogger.info({
+          msg: 'video_downloaded_from_openai',
+          requestId,
+          jobId,
+          videoSize: videoData.length,
+          downloadMs: Date.now() - downloadStart,
+        });
+      } catch (downloadError) {
+        blobLogger.error({
+          msg: 'video_not_found_in_blob_or_openai',
+          requestId,
+          jobId,
+          error: downloadError instanceof Error ? downloadError.message : String(downloadError),
+          latencyMs: Date.now() - start,
+        });
+        await blobLogger.flush();
+
+        return {
+          statusCode: 404,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            error: `Video not found for job ID: ${jobId}`,
+          }),
+        };
+      }
     }
 
     blobLogger.info({
@@ -97,6 +121,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       requestId,
       jobId,
       videoSize: videoData.length,
+      source,
       fetchMs: Date.now() - fetchStart,
       latencyMs: Date.now() - start,
     });
