@@ -5,85 +5,135 @@ export interface DreamTip {
 }
 
 export const DREAM_TIPS: DreamTip[] = [
-  // Did You Know
+  // Dream Recall & Recording Tips
   {
     id: 1,
-    tip: 'Did you know? The average person has 3-5 dreams per night, but most are forgotten within minutes of waking.',
-    category: 'did-you-know',
+    tip: 'Physical movement upon waking erases dream memories within seconds.',
+    category: 'dream-fact',
   },
   {
     id: 2,
-    tip: 'Did you know? Dreams can be in color or black and white - about 12% of people dream only in black and white.',
-    category: 'did-you-know',
+    tip: 'Delay equals forgetting; make dream recording your first morning activity without exception.',
+    category: 'dream-fact',
   },
   {
     id: 3,
-    tip: 'Did you know? You can only dream about faces you\'ve already seen, even if you don\'t remember them.',
-    category: 'did-you-know',
+    tip: 'Engage prospective memory by programming your mind to remember dreams before sleep.',
+    category: 'dream-fact',
   },
   {
     id: 4,
-    tip: 'Did you know? Animals dream too! Dogs, cats, and even some birds experience REM sleep and dreams.',
-    category: 'did-you-know',
+    tip: 'Jarring alarms spike stress hormones that inhibit dream recall; wake naturally when possible.',
+    category: 'dream-fact',
   },
   {
     id: 5,
-    tip: 'Did you know? Lucid dreaming (knowing you\'re dreaming while dreaming) can be learned with practice.',
-    category: 'did-you-know',
+    tip: 'Maintain detailed records with consistent structure to identify patterns and improve recall over time.',
+    category: 'dream-fact',
+  },
+  {
+    id: 6,
+    tip: 'Track recurring themes, symbols, and impossible elements that signal you&apos;re dreaming.',
+    category: 'dream-fact',
+  },
+  {
+    id: 7,
+    tip: 'Engage with dream memories throughout the day to strengthen recall pathways and recover forgotten fragments.',
+    category: 'dream-fact',
+  },
+  {
+    id: 8,
+    tip: 'Dream recall depends fundamentally on sleep quality—prioritize consistent schedules and restorative conditions.',
+    category: 'dream-fact',
+  },
+  {
+    id: 9,
+    tip: 'Capture nocturnal dreams with minimal disruption using voice memos, then transcribe to journal later.',
+    category: 'dream-fact',
+  },
+  {
+    id: 10,
+    tip: 'Vitamin B6 and other supplements can enhance dream vividness and recall when used appropriately.',
+    category: 'dream-fact',
+  },
+
+  // Lucid Dreaming Tips
+  {
+    id: 11,
+    tip: 'The most evidence-based lucid dreaming technique uses prospective memory to recognize dream states.',
+    category: 'dream-fact',
+  },
+  {
+    id: 12,
+    tip: 'Strategic sleep interruption during REM-rich periods dramatically increases lucid dreaming success rates.',
+    category: 'dream-fact',
+  },
+  {
+    id: 13,
+    tip: 'Build daytime habits of questioning reality that transfer into dreams, revealing you&apos;re dreaming.',
+    category: 'dream-fact',
+  },
+  {
+    id: 14,
+    tip: 'Maintain consciousness while your body falls asleep for immediate entry into lucid dreams.',
+    category: 'dream-fact',
+  },
+  {
+    id: 15,
+    tip: 'The most successful lucid dreamers use integrated protocols combining multiple complementary techniques.',
+    category: 'dream-fact',
+  },
+  {
+    id: 16,
+    tip: 'Regular meditation builds the awareness of awareness that directly transfers to dream lucidity.',
+    category: 'dream-fact',
+  },
+  {
+    id: 17,
+    tip: 'REM periods lengthen through the night—final REM periods last 45-60 minutes, first only 5-10 minutes.',
+    category: 'dream-fact',
+  },
+  {
+    id: 18,
+    tip: 'Galantamine is the only supplement with robust scientific validation for lucid dreaming.',
+    category: 'dream-fact',
+  },
+  {
+    id: 19,
+    tip: 'SSILD technique uses sensory focus cycles with research validation comparable to other methods.',
+    category: 'dream-fact',
+  },
+  {
+    id: 20,
+    tip: 'Lucid dreaming is a learnable skill requiring consistent practice balanced with sleep quality protection.',
+    category: 'dream-fact',
   },
 
   // Video Tips
   {
-    id: 11,
+    id: 21,
     tip: 'Video Tip: More descriptive prompts tend to produce more detailed and accurate videos.',
     category: 'video-tip',
   },
   {
-    id: 12,
+    id: 22,
     tip: 'Video Tip: Include specific details like colors, movements, and emotions for better results.',
     category: 'video-tip',
   },
   {
-    id: 13,
+    id: 23,
     tip: 'Video Tip: Your video will be 8 seconds long - perfect for capturing a dream moment!',
     category: 'video-tip',
   },
   {
-    id: 14,
+    id: 24,
     tip: 'Video Tip: Videos are generated in vertical 9:16 format, ideal for mobile viewing.',
     category: 'video-tip',
   },
   {
-    id: 15,
+    id: 25,
     tip: 'Video Tip: Try adding atmosphere words like "serene", "mysterious", or "vibrant" to enhance the mood.',
     category: 'video-tip',
-  },
-
-  // Dream Facts
-  {
-    id: 21,
-    tip: 'Dream Fact: The longest dreams occur during the final REM period, which can last up to 45 minutes.',
-    category: 'dream-fact',
-  },
-  {
-    id: 22,
-    tip: 'Dream Fact: Dreams during pregnancy tend to be more vivid and memorable due to hormonal changes.',
-    category: 'dream-fact',
-  },
-  {
-    id: 23,
-    tip: 'Dream Fact: People who are blind from birth experience dreams through other senses like sound, smell, and touch.',
-    category: 'dream-fact',
-  },
-  {
-    id: 24,
-    tip: 'Dream Fact: Nightmares are more common in children than adults and often decrease with age.',
-    category: 'dream-fact',
-  },
-  {
-    id: 25,
-    tip: 'Dream Fact: The word "nightmare" comes from "mare," a demon in folklore that sits on sleepers\' chests.',
-    category: 'dream-fact',
   },
 
   // AI Insights
